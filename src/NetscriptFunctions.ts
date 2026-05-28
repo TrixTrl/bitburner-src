@@ -117,6 +117,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Literatures } from "./Literature/Literatures";
 import { Messages } from "./Message/MessageHelpers";
 import { setDeprecatedProperties } from "./utils/DeprecationHelper";
+import { NetscriptSatellite } from "./NetscriptFunctions/Satellite";
 
 export const enums: NSEnums = {
   CityName,
@@ -158,6 +159,7 @@ export const ns: InternalAPI<NSFull> = {
   infiltration: NetscriptInfiltration(),
   ui: NetscriptUserInterface(),
   formulas: NetscriptFormulas(),
+  satcom: NetscriptSatellite(),
   stock: NetscriptStockMarket(),
   grafting: NetscriptGrafting(),
   hacknet: NetscriptHacknet(),

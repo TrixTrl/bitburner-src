@@ -7121,6 +7121,8 @@ export interface NS {
    */
   readonly grafting: Grafting;
 
+  readonly satcom: Satellite;
+
   /**
    * Arguments passed into the script.
    *
@@ -9651,6 +9653,26 @@ type NSEnums = {
   DarknetResponseCode: DarknetResponseCodeType;
   ProgramName: ProgramNameEnumType;
 };
+
+/**
+ * @public
+ */
+export type SignalScanResult = {
+  satellite: string;
+  signalStrength: number;
+}
+
+/**
+ * Satellite Communications API
+ * @public
+ */
+export interface Satellite {
+  sendToUplink(satellite: string, address: number, value: number): Promise<boolean>
+  readBuffer(satellite: string): number[]
+  readSignalStrength(horizontalAngle: number, verticalAngle: number): Promise<SignalScanResult[]>;
+  lockOn(satellite: string, horizontalAngle: number, verticalAngle: number): boolean;
+  //evaluateData()
+}
 
 /**
  * Corporation Office API

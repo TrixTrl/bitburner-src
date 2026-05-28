@@ -531,6 +531,13 @@ const corporation = {
   getOfficeSizeUpgradeCost: RamCostConstants.CorporationInfo,
 } as const;
 
+const satcom = {
+  sendToUplink: 1,
+  readBuffer: 1,
+  readSignalStrength: 1,
+  lockOn: 1,
+} as const;
+
 /** RamCosts guaranteed to match ns structure 1:1 (aside from args and enums).
  *  An error will be generated if there are missing OR additional ram costs defined.
  *  To avoid errors, define every function in NetscriptDefinition.d.ts and NetscriptFunctions,
@@ -552,6 +559,7 @@ export const RamCosts: RamCostTree<NSFull> = {
   stanek,
   ui,
   grafting,
+  satcom,
 
   sprintf: 0,
   vsprintf: 0,
