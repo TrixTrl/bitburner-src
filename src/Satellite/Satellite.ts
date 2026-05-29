@@ -5,7 +5,7 @@ export class Satellite {
   lockedOn: boolean = false;
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
-  signalStrength: number = Math.random() * Math.random() * 100;
+  signalStrength: number = (Math.random() + 0.5) * (Math.random() + 0.5) * 100;
 }
 
 export function corruptMemory(sat: Satellite) {

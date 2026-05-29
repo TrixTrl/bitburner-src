@@ -45,16 +45,24 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     readSignalStrength:
       (ctx: NetscriptContext) =>
         (_horizontalAngle, _verticalAngle): Promise<SignalScanResult[]> => {
-          const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle);
+          const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
           if (verticalAngle < 0) {
             throw helpers.errorMessage(ctx, `Vertical angle can not be negative`);
           }
-          const scanDelay = 7000;
+          if (verticalAngle > 90) {
+            throw helpers.errorMessage(ctx, `Vertical angle can not exceed 90`);
+          }
+
+          const scanDelay = 1000;
           return helpers.netscriptDelay(ctx, scanDelay).then(() => {
             const scanResult: SignalScanResult[] = [];
             for (const satelliteObject of Satellites) {
-              const angle = Math.sqrt(Math.pow(horizontalAngle - satelliteObject.horizontalAngle, 2) + Math.pow(verticalAngle - satelliteObject.verticalAngle, 2));
+              let hDelta = horizontalAngle - satelliteObject.horizontalAngle;
+              let vDelta = verticalAngle - satelliteObject.verticalAngle;
+              hDelta = Math.min(Math.abs(hDelta), Math.abs(360 - hDelta));
+              vDelta = Math.abs(vDelta);
+              const angle = Math.sqrt(Math.pow(hDelta, 2) + Math.pow(vDelta, 2));
               if (angle < 50) {
                 scanResult.push({
                   satellite: satelliteObject.name,
