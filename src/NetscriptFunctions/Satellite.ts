@@ -2,6 +2,7 @@ import { Satellite as SatelliteAPI, SignalScanResult } from "@nsdefs";
 import { InternalAPI, NetscriptContext } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import { Satellites } from "../Satellite/Satellites";
+import { tick } from "../Satellite/Satellite";
 
 export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
   return {
@@ -38,8 +39,8 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           if (satelliteObject == undefined) {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
           }
-          const buffer = satelliteObject.memory;
-          satelliteObject.memory = [];
+          const buffer = satelliteObject.buffer;
+          satelliteObject.buffer = [];
           return buffer;
         },
     readSignalStrength:
@@ -77,8 +78,14 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
       (ctx: NetscriptContext) =>
         (_satellite, _horizontalAngle, _verticalAngle): boolean => {
           const satellite = helpers.string(ctx, "satellite", _satellite);
-          const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle);
-          const verticalAngle = helpers.positiveNumber(ctx, "verticalAngle", _verticalAngle);
+          const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
+          const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
+          if (verticalAngle < 0) {
+            throw helpers.errorMessage(ctx, `Vertical angle can not be negative`);
+          }
+          if (verticalAngle > 90) {
+            throw helpers.errorMessage(ctx, `Vertical angle can not exceed 90`);
+          }
           const satelliteObject = Satellites.find((val) => val.name == satellite);
           if (satelliteObject == undefined) {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
@@ -88,6 +95,16 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
             satelliteObject.lockedOn = true;
           }
           return satelliteObject.lockedOn;
+        },
+    tick:
+      (ctx: NetscriptContext) =>
+        (_satellite): void => {
+          const satellite = helpers.string(ctx, "satellite", _satellite);
+          const satelliteObject = Satellites.find((val) => val.name == satellite);
+          if (satelliteObject == undefined) {
+            throw helpers.errorMessage(ctx, `Could not find satellite`);
+          }
+          tick(satelliteObject);
         },
   }
 }

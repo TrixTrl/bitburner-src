@@ -9672,7 +9672,7 @@ export interface Satellite {
   readBuffer(satellite: string): number[]
   readSignalStrength(horizontalAngle: number, verticalAngle: number): Promise<SignalScanResult[]>;
   lockOn(satellite: string, horizontalAngle: number, verticalAngle: number): boolean;
-  //evaluateData()
+  tick(satellite: string): void;
 }
 
 /**

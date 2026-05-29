@@ -3,7 +3,7 @@ export class Satellite {
   memory: number[] = getMemory();
   instructionPointer: number = 0;
   buffer: number[] = [];
-  lockedOn: boolean = false;
+  lockedOn: boolean = true;
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
   signalStrength: number = (Math.random() + 0.5) * (Math.random() + 0.5) * 100;
@@ -227,7 +227,7 @@ export function tick(sat: Satellite) {
 function readFromAddress(sat: Satellite, address: number) {
   if (address == 255) {
     // Read from input
-    return 0;
+    return 5;
   }
   return sat.memory[address];
 }

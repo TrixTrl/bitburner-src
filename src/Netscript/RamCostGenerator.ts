@@ -536,6 +536,7 @@ const satcom = {
   readBuffer: 1,
   readSignalStrength: 1,
   lockOn: 1,
+  tick: 1
 } as const;
 
 /** RamCosts guaranteed to match ns structure 1:1 (aside from args and enums).
