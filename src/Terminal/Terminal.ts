@@ -366,7 +366,7 @@ export class Terminal {
       `Security decreased on '${server.hostname}' by ${formatSecurity(weakenAmt)} from ${formatSecurity(
         oldSec,
       )} to ${formatSecurity(newSec)} (min: ${formatSecurity(server.minDifficulty)})` +
-        ` and Gained ${formatExp(expGain)} hacking exp.`,
+      ` and Gained ${formatExp(expGain)} hacking exp.`,
     );
   }
 
@@ -385,6 +385,9 @@ export class Terminal {
         }
         Router.toPage(Page.BitVerse, { flume: false, quick: false });
         return;
+      }
+      if ("solaris" === server.hostname) {  // something weird is going on with the special names, not sure how to handle this cleanly
+        server.pushProgram(CompletedProgramName.satcom);
       }
       // Manunally check for faction invites
       Engine.Counters.checkFactionInvitations = 0;
@@ -422,8 +425,7 @@ export class Terminal {
         this.print("Time to hack: " + (!isHacknet ? convertTimeMsToTimeElapsedString(hackingTime, true) : "N/A"));
       }
       this.print(
-        `Total money available on server: ${
-          currServ instanceof Server ? formatMoney(currServ.moneyAvailable, true) : "N/A"
+        `Total money available on server: ${currServ instanceof Server ? formatMoney(currServ.moneyAvailable, true) : "N/A"
         }`,
       );
       if (currServ instanceof Server) {
@@ -571,8 +573,7 @@ export class Terminal {
         break;
       case CodingContractResult.InvalidFormat:
         this.error(
-          `Contract FAILED - ${
-            promptResult.message ?? `The answer is not in the right format for contract '${contract.type}'`
+          `Contract FAILED - ${promptResult.message ?? `The answer is not in the right format for contract '${contract.type}'`
           }`,
         );
         break;

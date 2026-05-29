@@ -14,4 +14,5 @@ export enum CompletedProgramName {
   flight = "fl1ght.exe",
   darkscape = "DarkscapeNavigator.exe",
   stormSeed = "STORM_SEED.exe",
+  satcom = "SatCom.exe",
 }

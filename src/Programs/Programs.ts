@@ -16,6 +16,7 @@ import { Page } from "../ui/Router";
 import { knowAboutBitverse } from "../BitNode/BitNodeUtils";
 import { handleStormSeed } from "../DarkNet/effects/webstorm";
 import { clampNumber } from "../utils/helpers/clampNumber";
+import { regenerateSatellites, satellitesGenerated } from "../Satellite/Satellites";
 
 function requireHackingLevel(lvl: number) {
   return function () {
@@ -39,8 +40,8 @@ function warnIfNonArgProgramIsRunWithArgs(name: CompletedProgramName, args: stri
   }
   Terminal.warn(
     `You are running ${name} with arguments, but ${name} does not accept arguments. These arguments will be ignored. ` +
-      `${name} only affects the server ('${Player.currentServer}') that you are connecting via the terminal. ` +
-      "If you want to pass the target's hostname as an argument, you have to use the respective NS API.",
+    `${name} only affects the server ('${Player.currentServer}') that you are connecting via the terminal. ` +
+    "If you want to pass the target's hostname as an argument, you have to use the respective NS API.",
   );
 }
 
@@ -372,6 +373,20 @@ export const Programs: Record<CompletedProgramName, Program> = {
       Terminal.print("You can feel a storm approaching...");
       const connectedServer = Player.getCurrentServer();
       handleStormSeed(connectedServer);
+    },
+  }),
+  [CompletedProgramName.satcom]: new Program({
+    name: CompletedProgramName.satcom,
+    create: null,
+    run: (): void => {
+      if (satellitesGenerated) {
+        Terminal.print("You already have access to the satellite uplink.");
+      } else {
+        regenerateSatellites(7);
+        Terminal.print("This program has given you access to the satellite uplink.");
+        Terminal.print("The satellites run on very simple bytecode, the manual for which can be found on the home computer. (Still need to add that)");
+        Terminal.print("Due to their age and the radiation exposure random bit flips will occour in their memory, requiring scripts to be hardened, or checked and overwritten with correct data regularly.");
+      }
     },
   }),
 };

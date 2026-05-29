@@ -1,7 +1,7 @@
 import { Satellite as SatelliteAPI, SignalScanResult } from "@nsdefs";
-import { InternalAPI, NetscriptContext } from "src/Netscript/APIWrapper";
-import { helpers } from "src/Netscript/NetscriptHelpers";
-import { Satellites } from "src/Satellite/Satellites";
+import { InternalAPI, NetscriptContext } from "../Netscript/APIWrapper";
+import { helpers } from "../Netscript/NetscriptHelpers";
+import { Satellites } from "../Satellite/Satellites";
 
 export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
   return {
@@ -46,7 +46,10 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
       (ctx: NetscriptContext) =>
         (_horizontalAngle, _verticalAngle): Promise<SignalScanResult[]> => {
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle);
-          const verticalAngle = helpers.positiveNumber(ctx, "verticalAngle", _verticalAngle);
+          const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
+          if (verticalAngle < 0) {
+            throw helpers.errorMessage(ctx, `Vertical angle can not be negative`);
+          }
           const scanDelay = 7000;
           return helpers.netscriptDelay(ctx, scanDelay).then(() => {
             const scanResult: SignalScanResult[] = [];

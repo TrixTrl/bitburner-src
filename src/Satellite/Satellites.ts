@@ -1,6 +1,7 @@
 import { corruptMemory, Satellite } from "./Satellite";
 
 export let Satellites: Satellite[] = [];
+export let satellitesGenerated = false;
 
 export function regenerateSatellites(amount: number) {
   Satellites = [];
@@ -10,4 +11,5 @@ export function regenerateSatellites(amount: number) {
       corruptMemory(Satellites[i]);
     }
   }
+  satellitesGenerated = true;
 }
