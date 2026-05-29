@@ -37,6 +37,7 @@ import { InfiltrationState } from "./Infiltration/formulas/game";
 import { hasDarknetAccess } from "./DarkNet/utils/darknetAuthUtils";
 import { loadSettings } from "./Settings/SettingsUtils";
 import { getBitNodeLevel } from "./BitNode/BitNodeUtils";
+import { getSatelliteSave, loadSatellites } from "./Satellite/SaveLoad";
 
 /* SaveObject.js
  *  Defines the object used to save/load games
@@ -92,6 +93,7 @@ export type BitburnerSaveObjectType = {
   GoSave: unknown; // "loadGo" function can process unknown data
   DarknetSave: unknown;
   InfiltrationsSave: unknown;
+  SatellitesSave: unknown;
 };
 
 type ParsedSaveData = {
@@ -204,6 +206,7 @@ class BitburnerSaveObject implements BitburnerSaveObjectType {
   GoSave = "";
   DarknetSave = "";
   InfiltrationsSave = "";
+  SatellitesSave = "";
 
   async getSaveData(forceExcludeRunningScripts = false): Promise<SaveData> {
     this.PlayerSave = JSON.stringify(Player);
@@ -226,6 +229,7 @@ class BitburnerSaveObject implements BitburnerSaveObjectType {
     this.GoSave = JSON.stringify(getGoSave());
     this.DarknetSave = JSON.stringify(getDarkNetSave());
     this.InfiltrationsSave = JSON.stringify(InfiltrationState);
+    this.SatellitesSave = JSON.stringify(getSatelliteSave());
 
     if (Player.gang) this.AllGangsSave = JSON.stringify(AllGangs);
 
@@ -487,6 +491,7 @@ async function loadGame(saveData: SaveData): Promise<boolean> {
   loadGo(saveObj.GoSave);
   loadDarkNet(saveObj.DarknetSave);
   loadInfiltrations(saveObj.InfiltrationsSave);
+  loadSatellites(saveObj.SatellitesSave);
 
   try {
     loadAliases(saveObj.AliasesSave);
@@ -578,9 +583,9 @@ function createNewUpdateText() {
     () =>
       dialogBoxCreate(
         "New update!\n" +
-          "Please report any bugs/issues through the GitHub repository (https://github.com/bitburner-official/bitburner-src/issues) " +
-          "or the #bug-report channel on Discord (https://discord.com/channels/415207508303544321/415213413745164318).\n\n" +
-          CONSTANTS.LatestUpdate,
+        "Please report any bugs/issues through the GitHub repository (https://github.com/bitburner-official/bitburner-src/issues) " +
+        "or the #bug-report channel on Discord (https://discord.com/channels/415207508303544321/415213413745164318).\n\n" +
+        CONSTANTS.LatestUpdate,
       ),
     1000,
   );
@@ -591,10 +596,10 @@ function createBetaUpdateText() {
     () =>
       dialogBoxCreate(
         "You are playing on the beta environment! This branch of the game " +
-          "features the latest developments in the game. This version may be unstable.\n" +
-          "Please report any bugs/issues through the github repository (https://github.com/bitburner-official/bitburner-src/issues) " +
-          "or the #bug-report channel on Discord (https://discord.com/channels/415207508303544321/415213413745164318).\n\n" +
-          CONSTANTS.LatestUpdate,
+        "features the latest developments in the game. This version may be unstable.\n" +
+        "Please report any bugs/issues through the github repository (https://github.com/bitburner-official/bitburner-src/issues) " +
+        "or the #bug-report channel on Discord (https://discord.com/channels/415207508303544321/415213413745164318).\n\n" +
+        CONSTANTS.LatestUpdate,
       ),
     1000,
   );
