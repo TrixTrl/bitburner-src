@@ -1,3 +1,5 @@
+import { Puzzle } from "./Puzzles";
+
 export class Satellite {
   name: string = randomName();
   memory: number[] = getMemory();
@@ -7,6 +9,7 @@ export class Satellite {
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
   signalStrength: number = (Math.random() + 0.5) * (Math.random() + 0.5) * 100;
+  puzzle: Puzzle = getRandomPuzzle();
 }
 
 export function corruptMemory(sat: Satellite) {
@@ -227,7 +230,7 @@ export function tick(sat: Satellite) {
 function readFromAddress(sat: Satellite, address: number) {
   if (address == 255) {
     // Read from input
-    return 5;
+    return sat.puzzle.readInput(sat.puzzle);
   }
   return sat.memory[address];
 }
@@ -239,6 +242,11 @@ function writeToAddress(sat: Satellite, address: number, value: number) {
     if (sat.buffer.length > 20) {
       sat.buffer.splice(0, 1);
     }
+  } else if (address == 254) {
+    // Check puzzle solution
+    if (sat.puzzle.validateOutput(sat.puzzle, value)) {
+      // Give reward
+    }
   } else {
     sat.memory[address] = value;
   }
@@ -246,4 +254,28 @@ function writeToAddress(sat: Satellite, address: number, value: number) {
 
 function incrememntPointer(sat: Satellite) {
   sat.instructionPointer = (sat.instructionPointer + 1) % 256;
+}
+
+function getRandomPuzzle() {
+  const puzzle: Puzzle = {
+    name: "factorial",
+    data: [Math.floor(Math.random() * 10)],
+    readInput: (puzzle: Puzzle) => {
+      puzzle.data = [Math.floor(Math.random() * 8) + 2];
+      return puzzle.data[0];
+    },
+    validateOutput: (puzzle: Puzzle, input: number) => {
+      function factorial(n: number): number {
+        if (n <= 1) return 1;
+        return n * factorial(n - 1);
+      }
+      const correct = input == factorial(puzzle.data[0]);
+      if (correct) {
+        puzzle.data = [Math.floor(Math.random() * 8) + 2];
+      }
+      return correct;
+    }
+
+  };
+  return puzzle;
 }
