@@ -1,4 +1,4 @@
-export type Puzzle = {
+export interface Puzzle {
   name: string;
   data: number[];
   readInput: (puzzle: Puzzle) => number;

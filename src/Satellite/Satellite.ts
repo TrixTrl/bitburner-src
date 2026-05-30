@@ -261,7 +261,7 @@ function getRandomPuzzle() {
     name: "factorial",
     data: [Math.floor(Math.random() * 10)],
     readInput: (puzzle: Puzzle) => {
-      puzzle.data = [Math.floor(Math.random() * 8) + 2];
+      puzzle.data = [Math.floor(Math.random() * 8) + 5];
       return puzzle.data[0];
     },
     validateOutput: (puzzle: Puzzle, input: number) => {
@@ -271,7 +271,7 @@ function getRandomPuzzle() {
       }
       const correct = input == factorial(puzzle.data[0]);
       if (correct) {
-        puzzle.data = [Math.floor(Math.random() * 8) + 2];
+        puzzle.data = [Math.floor(Math.random() * 8) + 5];
       }
       return correct;
     }
