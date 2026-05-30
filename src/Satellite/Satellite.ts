@@ -5,7 +5,7 @@ export class Satellite {
   memory: number[] = getMemory();
   instructionPointer: number = 0;
   buffer: number[] = [];
-  lockedOn: boolean = true;
+  lockedOn: boolean = false;
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
   signalStrength: number = (Math.random() + 0.5) * (Math.random() + 0.5) * 100;

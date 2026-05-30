@@ -9656,22 +9656,14 @@ type NSEnums = {
 };
 
 /**
- * @public
- */
-export type SignalScanResult = {
-  satellite: string;
-  signalStrength: number;
-}
-
-/**
  * Satellite Communications API
  * @public
  */
 export interface Satellite {
   sendToUplink(satellite: string, address: number, value: number): Promise<boolean>
   readBuffer(satellite: string): number[]
-  readSignalStrength(horizontalAngle: number, verticalAngle: number): Promise<SignalScanResult[]>;
-  lockOn(satellite: string, horizontalAngle: number, verticalAngle: number): boolean;
+  readSignalStrength(horizontalAngle: number, verticalAngle: number): Promise<Map<string, number>>;
+  lockOn(satellite: string, horizontalAngle: number, verticalAngle: number, devOverride?: boolean): boolean;
   tick(satellite: string): void;
 }
 

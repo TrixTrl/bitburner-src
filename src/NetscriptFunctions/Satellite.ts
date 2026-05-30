@@ -1,4 +1,4 @@
-import { Satellite as SatelliteAPI, SignalScanResult } from "@nsdefs";
+import { Satellite as SatelliteAPI } from "@nsdefs";
 import { InternalAPI, NetscriptContext } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import { Satellites } from "../Satellite/Satellites";
@@ -45,7 +45,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
         },
     readSignalStrength:
       (ctx: NetscriptContext) =>
-        (_horizontalAngle, _verticalAngle): Promise<SignalScanResult[]> => {
+        (_horizontalAngle, _verticalAngle): Promise<Map<string, number>> => {
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
           if (verticalAngle < 0) {
@@ -57,7 +57,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
 
           const scanDelay = 1000;
           return helpers.netscriptDelay(ctx, scanDelay).then(() => {
-            const scanResult: SignalScanResult[] = [];
+            const scanResult: Map<string, number> = new Map();
             for (const satelliteObject of Satellites) {
               let hDelta = horizontalAngle - satelliteObject.horizontalAngle;
               let vDelta = verticalAngle - satelliteObject.verticalAngle;
@@ -65,10 +65,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
               vDelta = Math.abs(vDelta);
               const angle = Math.sqrt(Math.pow(hDelta, 2) + Math.pow(vDelta, 2));
               if (angle < 50) {
-                scanResult.push({
-                  satellite: satelliteObject.name,
-                  signalStrength: satelliteObject.signalStrength / Math.pow(angle, 2)
-                } as SignalScanResult);
+                scanResult.set(satelliteObject.name, satelliteObject.signalStrength / Math.pow(angle, 2));
               }
             }
             return scanResult;
@@ -76,10 +73,11 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
         },
     lockOn:
       (ctx: NetscriptContext) =>
-        (_satellite, _horizontalAngle, _verticalAngle): boolean => {
+        (_satellite, _horizontalAngle, _verticalAngle, _devOverride): boolean => {
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
+          const devOverride = helpers.boolean(ctx, "devOverride", _devOverride);
           if (verticalAngle < 0) {
             throw helpers.errorMessage(ctx, `Vertical angle can not be negative`);
           }
@@ -91,7 +89,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
           }
           const angle = Math.sqrt(Math.pow(horizontalAngle - satelliteObject.horizontalAngle, 2) + Math.pow(verticalAngle - satelliteObject.verticalAngle, 2));
-          if (angle < 5) {
+          if (angle < 5 || devOverride) {
             satelliteObject.lockedOn = true;
           }
           return satelliteObject.lockedOn;
