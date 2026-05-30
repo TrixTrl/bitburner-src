@@ -46,8 +46,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           if (satelliteObject == undefined) {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
           }
-          const buffer = satelliteObject.outputBuffer;
-          satelliteObject.outputBuffer = [];
+          const buffer = satelliteObject.outputBuffer.splice(0);
           return buffer;
         },
     readSignalStrength:

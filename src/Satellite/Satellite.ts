@@ -222,7 +222,9 @@ export function tick(sat: Satellite) {
         break;
       }
     default: // NOP
-      sat.instructionPointer = (sat.instructionPointer + 3) % 256;
+      incrememntPointer(sat);
+      incrememntPointer(sat);
+      incrememntPointer(sat);
       break;
   }
 }
@@ -230,13 +232,14 @@ export function tick(sat: Satellite) {
 
 function readFromAddress(sat: Satellite, address: number) {
   if (address == 255) {
+    // Read from input buffer
     if (sat.inputBuffer.length == 0) {
       return 0;
     } else {
       return sat.inputBuffer.splice(0, 1)[0];
     }
   } else if (address == 254) {
-    // Read from input
+    // Read from puzzle input
     return sat.puzzle.readInput(sat.puzzle);
   }
   return sat.memory[address];
