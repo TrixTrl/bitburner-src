@@ -4,7 +4,8 @@ export class Satellite {
   name: string = randomName();
   memory: number[] = getMemory();
   instructionPointer: number = 0;
-  buffer: number[] = [];
+  outputBuffer: number[] = [];
+  inputBuffer: number[] = [];
   lockedOn: boolean = false;
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
@@ -229,6 +230,12 @@ export function tick(sat: Satellite) {
 
 function readFromAddress(sat: Satellite, address: number) {
   if (address == 255) {
+    if (sat.inputBuffer.length == 0) {
+      return 0;
+    } else {
+      return sat.inputBuffer.splice(0, 1)[0];
+    }
+  } else if (address == 254) {
     // Read from input
     return sat.puzzle.readInput(sat.puzzle);
   }
@@ -238,9 +245,9 @@ function readFromAddress(sat: Satellite, address: number) {
 function writeToAddress(sat: Satellite, address: number, value: number) {
   if (address == 255) {
     // Write to output
-    sat.buffer.push(value);
-    if (sat.buffer.length > 20) {
-      sat.buffer.splice(0, 1);
+    sat.outputBuffer.push(value);
+    if (sat.outputBuffer.length > 20) {
+      sat.outputBuffer.splice(0, 1);
     }
   } else if (address == 254) {
     // Check puzzle solution

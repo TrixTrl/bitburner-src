@@ -26,7 +26,14 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           const uploadDelay = lockedOn ? 2000 : 5000;
           return helpers.netscriptDelay(ctx, uploadDelay).then(() => {
             if (lockedOn == true) {
-              satelliteObject.memory[address] = value;
+              if (address == 255) {
+                satelliteObject.inputBuffer.push(value);
+                if (satelliteObject.inputBuffer.length > 20) {
+                  satelliteObject.inputBuffer.splice(1, 0);
+                }
+              } else {
+                satelliteObject.memory[address] = value;
+              }
             }
             return lockedOn == true;
           });
@@ -39,8 +46,8 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           if (satelliteObject == undefined) {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
           }
-          const buffer = satelliteObject.buffer;
-          satelliteObject.buffer = [];
+          const buffer = satelliteObject.outputBuffer;
+          satelliteObject.outputBuffer = [];
           return buffer;
         },
     readSignalStrength:
