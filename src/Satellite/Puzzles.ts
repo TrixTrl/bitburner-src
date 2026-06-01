@@ -1,5 +1,7 @@
+export type puzzleType = "factorial" | "echo";
+
 export type Puzzle = {
-  name: string;
+  name: puzzleType;
   data: number[];
   /*readInput: (puzzle: Puzzle) => number;
   validateOutput: (puzzle: Puzzle, input: number) => boolean;*/
@@ -11,7 +13,11 @@ export function readInput(puzzle: Puzzle) {
       {
         puzzle.data = [Math.floor(Math.random() * 8) + 5];
         return puzzle.data[0];
-        break;
+      }
+    case "echo":
+      {
+        puzzle.data = [Math.random() * 100];
+        return puzzle.data[0];
       }
     default:
       {
@@ -30,6 +36,13 @@ export function validateOutput(puzzle: Puzzle, input: number) {
         }
         return correct;
       }
+    case "echo": {
+      const correct = input == puzzle.data[0];
+      if (correct) {
+        puzzle.data = [Math.random() * 100];
+      }
+      return correct;
+    }
     default:
       {
         throw new Error(`Invalid satellite puzzle type: ${puzzle.name}`);
