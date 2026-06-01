@@ -1,4 +1,4 @@
-import { Puzzle } from "./Puzzles";
+import { Puzzle, readInput, validateOutput } from "./Puzzles";
 
 export class Satellite {
   name: string = randomName();
@@ -240,7 +240,7 @@ function readFromAddress(sat: Satellite, address: number) {
     }
   } else if (address == 254) {
     // Read from puzzle input
-    return sat.puzzle.readInput(sat.puzzle);
+    return readInput(sat.puzzle);
   }
   return sat.memory[address];
 }
@@ -254,7 +254,7 @@ function writeToAddress(sat: Satellite, address: number, value: number) {
     }
   } else if (address == 254) {
     // Check puzzle solution
-    if (sat.puzzle.validateOutput(sat.puzzle, value)) {
+    if (validateOutput(sat.puzzle, value)) {
       // Give reward
     }
   } else {
@@ -270,22 +270,6 @@ function getRandomPuzzle() {
   const puzzle: Puzzle = {
     name: "factorial",
     data: [Math.floor(Math.random() * 10)],
-    readInput: (puzzle: Puzzle) => {
-      puzzle.data = [Math.floor(Math.random() * 8) + 5];
-      return puzzle.data[0];
-    },
-    validateOutput: (puzzle: Puzzle, input: number) => {
-      function factorial(n: number): number {
-        if (n <= 1) return 1;
-        return n * factorial(n - 1);
-      }
-      const correct = input == factorial(puzzle.data[0]);
-      if (correct) {
-        puzzle.data = [Math.floor(Math.random() * 8) + 5];
-      }
-      return correct;
-    }
-
   };
   return puzzle;
 }
