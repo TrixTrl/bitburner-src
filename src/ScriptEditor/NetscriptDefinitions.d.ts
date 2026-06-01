@@ -4417,7 +4417,22 @@ export type DarknetResult = { success: boolean; code: DarknetResponseCode; messa
 export type CacheResult = {
   success: boolean;
   message: string;
+} & CacheReward;
+
+/** @public */
+export type CacheReward = {
   karmaLoss: number;
+  wseAccount: boolean;
+  tixApiAccess: boolean;
+  fourSigmaData: boolean;
+
+  money?: number;
+  programName?: ProgramName;
+  stockSymbol?: string;
+  stockShares?: number;
+  dataFilePaths?: string[];
+  contractFilePaths?: string[];
+  augmentationName?: string;
 };
 
 /**
@@ -5423,7 +5438,7 @@ export interface GoCheat {
   /**
    * Attempts to remove an existing router, leaving an empty node behind.
    *
-   * Success chance can be seen via ns.go.getCheatSuccessChance()
+   * Success chance can be seen via ns.go.cheat.getCheatSuccessChance()
    *
    * Warning: if you fail to play a cheat move, your turn will be skipped. After your first cheat attempt, if you fail, there is a
    * small (~10%) chance you will instantly be ejected from the subnet.
@@ -5451,7 +5466,7 @@ export interface GoCheat {
    * Attempts to place two routers at once on empty nodes. Note that this ignores other move restrictions, so you can
    * suicide your own routers if they have no access to empty ports and do not capture any enemy routers.
    *
-   * Success chance can be seen via ns.go.getCheatSuccessChance()
+   * Success chance can be seen via ns.go.cheat.getCheatSuccessChance()
    *
    * Warning: if you fail to play a cheat move, your turn will be skipped. After your first cheat attempt, if you fail, there is a
    * small (~10%) chance you will instantly be ejected from the subnet.
@@ -5483,7 +5498,7 @@ export interface GoCheat {
   /**
    * Attempts to repair an offline node, leaving an empty playable node behind.
    *
-   * Success chance can be seen via ns.go.getCheatSuccessChance()
+   * Success chance can be seen via ns.go.cheat.getCheatSuccessChance()
    *
    * Warning: if you fail to play a cheat move, your turn will be skipped. After your first cheat attempt, if you fail, there is a
    * small (~10%) chance you will instantly be ejected from the subnet.
@@ -5512,7 +5527,7 @@ export interface GoCheat {
    * Attempts to destroy an empty node, leaving an offline dead space that does not count as territory or
    * provide open node access to adjacent routers.
    *
-   * Success chance can be seen via ns.go.getCheatSuccessChance()
+   * Success chance can be seen via ns.go.cheat.getCheatSuccessChance()
    *
    * Warning: if you fail to play a cheat move, your turn will be skipped. After your first cheat attempt, if you fail, there is a
    * small (~10%) chance you will instantly be ejected from the subnet.
