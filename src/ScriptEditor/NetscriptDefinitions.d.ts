@@ -9655,6 +9655,15 @@ type NSEnums = {
   ProgramName: ProgramNameEnumType;
 };
 
+
+/**
+ * @public
+ */
+
+export type SatelliteInfo = {
+  puzzleName: string;
+  puzzleDescription: string;
+};
 /**
  * Satellite Communications API
  * @public
@@ -9665,6 +9674,7 @@ export interface Satellite {
   readSignalStrength(horizontalAngle: number, verticalAngle: number): Promise<Map<string, number>>;
   lockOn(satellite: string, horizontalAngle: number, verticalAngle: number, devOverride?: boolean): boolean;
   tick(satellite: string): void;
+  info(satellite: string): SatelliteInfo;
 }
 
 /**

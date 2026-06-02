@@ -1,4 +1,5 @@
-import { Puzzle, readInput, validateOutput } from "./Puzzles";
+import { SatelliteInfo } from "@nsdefs";
+import { Puzzle, puzzleType, readInput, updatePuzzleData, validateOutput } from "./Puzzles";
 
 export class Satellite {
   name: string = randomName();
@@ -10,12 +11,19 @@ export class Satellite {
   horizontalAngle: number = Math.random() * 360;
   verticalAngle: number = Math.random() * 90;
   signalStrength: number = (Math.random() + 0.5) * (Math.random() + 0.5) * 100;
-  puzzle: Puzzle = getRandomPuzzle();
+  puzzle: Puzzle = generateRandomPuzzle();
 }
 
 export function corruptMemory(sat: Satellite) {
   const randomMemoryValue = Math.floor(Math.random() * 255);
   sat.memory[randomMemoryValue] ^= 2 ** Math.floor(Math.random() * 8);
+}
+
+export function getInfo(sat: Satellite): SatelliteInfo {
+  return {
+    puzzleName: sat.puzzle.name,
+    puzzleDescription: "TO BE IMPLEMENTED, RN YOU HAVE TO GUESS FROM THE NAME :3"
+  } as SatelliteInfo;
 }
 
 function randomName() {
@@ -29,7 +37,7 @@ function randomName() {
 
 function getMemory() {
   const memory = [];
-  for (let i = 0; i < 256; i++) {
+  for (let i = 0; i < 254; i++) {
     memory.push(0);
   }
   return memory;
@@ -240,6 +248,7 @@ function readFromAddress(sat: Satellite, address: number) {
     }
   } else if (address == 254) {
     // Read from puzzle input
+    updatePuzzleData(sat.puzzle, true);
     return readInput(sat.puzzle);
   }
   return sat.memory[address];
@@ -254,6 +263,7 @@ function writeToAddress(sat: Satellite, address: number, value: number) {
     }
   } else if (address == 254) {
     // Check puzzle solution
+    updatePuzzleData(sat.puzzle, false);
     if (validateOutput(sat.puzzle, value)) {
       // Give reward
     }
@@ -266,10 +276,14 @@ function incrememntPointer(sat: Satellite) {
   sat.instructionPointer = (sat.instructionPointer + 1) % 256;
 }
 
-function getRandomPuzzle() {
+function generateRandomPuzzle() {
+  const puzzles: puzzleType[] = ["factorial", "echo", "list-sort"];
+  const chosenPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
   const puzzle: Puzzle = {
-    name: "factorial",
-    data: [Math.floor(Math.random() * 10)],
+    name: chosenPuzzle,
+    data: [],
+    remainingData: 0,
+    remainingOutput: 0,
   };
   return puzzle;
 }

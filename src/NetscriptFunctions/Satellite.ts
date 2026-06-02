@@ -1,8 +1,8 @@
-import { Satellite as SatelliteAPI } from "@nsdefs";
+import { Satellite as SatelliteAPI, SatelliteInfo } from "@nsdefs";
 import { InternalAPI, NetscriptContext } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
 import { Satellites } from "../Satellite/Satellites";
-import { tick } from "../Satellite/Satellite";
+import { getInfo, tick } from "../Satellite/Satellite";
 
 export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
   return {
@@ -109,6 +109,16 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
             throw helpers.errorMessage(ctx, `Could not find satellite`);
           }
           tick(satelliteObject);
+        },
+    info:
+      (ctx: NetscriptContext) =>
+        (_satellite): SatelliteInfo => {
+          const satellite = helpers.string(ctx, "satellite", _satellite);
+          const satelliteObject = Satellites.find((val) => val.name == satellite);
+          if (satelliteObject == undefined) {
+            throw helpers.errorMessage(ctx, `Could not find satellite`);
+          }
+          return getInfo(satelliteObject);
         },
   }
 }
