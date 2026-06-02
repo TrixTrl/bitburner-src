@@ -1,5 +1,7 @@
 import { SatelliteInfo } from "@nsdefs";
-import { Puzzle, puzzleType, readInput, updatePuzzleData, validateOutput } from "./Puzzles";
+import { Puzzle, readInput, updatePuzzleData, validateOutput } from "./Puzzles";
+import { Player } from "@player";
+import { PuzzleTypes } from "./Enums";
 
 export class Satellite {
   name: string = randomName();
@@ -266,6 +268,7 @@ function writeToAddress(sat: Satellite, address: number, value: number) {
     updatePuzzleData(sat.puzzle, false);
     if (validateOutput(sat.puzzle, value)) {
       // Give reward
+      Player.gainMoney(1000, "other");
     }
   } else {
     sat.memory[address] = value;
@@ -277,10 +280,10 @@ function incrememntPointer(sat: Satellite) {
 }
 
 function generateRandomPuzzle() {
-  const puzzles: puzzleType[] = ["factorial", "echo", "list-sort"];
-  const chosenPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
+  const puzzleChoices = [PuzzleTypes.echo, PuzzleTypes.factorial, PuzzleTypes.listSort];
+  const puzzleChoice = puzzleChoices[Math.floor(Math.random()*puzzleChoices.length)];
   const puzzle: Puzzle = {
-    name: chosenPuzzle,
+    name: puzzleChoice,
     data: [],
     remainingData: 0,
     remainingOutput: 0,

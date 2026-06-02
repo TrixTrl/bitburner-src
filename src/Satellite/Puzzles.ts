@@ -1,4 +1,4 @@
-export type puzzleType = "factorial" | "echo" | "list-sort";
+import { puzzleType, PuzzleTypes } from "./Enums";
 
 export type Puzzle = {
   name: puzzleType;
@@ -10,21 +10,21 @@ export type Puzzle = {
 export function updatePuzzleData(puzzle: Puzzle, reading: boolean) {
   if ((reading && puzzle.remainingData <= 0) || puzzle.remainingOutput <= 0) {
     switch (puzzle.name) {
-      case "factorial":
+      case PuzzleTypes.factorial:
         {
           puzzle.data = [Math.floor(Math.random() * 8) + 5];
           puzzle.remainingData = 1;
           puzzle.remainingOutput = 1;
           break;
         }
-      case "echo":
+      case PuzzleTypes.echo:
         {
           puzzle.data = [Math.floor(Math.random() * 100)];
           puzzle.remainingData = 1;
           puzzle.remainingOutput = 1;
           break;
         }
-      case "list-sort":
+      case PuzzleTypes.listSort:
         {
           const listLength = Math.floor(Math.random() * 5) + 3;
           puzzle.data = [];
@@ -46,19 +46,19 @@ export function readInput(puzzle: Puzzle) {
     throw new Error('Trying to read satellite puzzle data although it should have been reset, this is a bug, bug me (Hallowed / @TrixTrl) about it');
   }
   switch (puzzle.name) {
-    case "factorial":
+    case PuzzleTypes.factorial:
       {
         const index = puzzle.data.length - puzzle.remainingData;
         puzzle.remainingData--;
         return puzzle.data[index];
       }
-    case "echo":
+    case PuzzleTypes.echo:
       {
         const index = puzzle.data.length - puzzle.remainingData;
         puzzle.remainingData--;
         return puzzle.data[index];
       }
-    case "list-sort": {
+    case PuzzleTypes.listSort: {
       const index = puzzle.data.length - puzzle.remainingData;
       puzzle.remainingData--;
       return puzzle.data[index];
@@ -72,7 +72,7 @@ export function readInput(puzzle: Puzzle) {
 
 export function validateOutput(puzzle: Puzzle, input: number) {
   switch (puzzle.name) {
-    case "factorial":
+    case PuzzleTypes.factorial:
       {
         const correct = input == factorial(puzzle.data[0]);
         if (correct) {
@@ -82,7 +82,7 @@ export function validateOutput(puzzle: Puzzle, input: number) {
         }
         return puzzle.remainingData == 0;
       }
-    case "echo": {
+    case PuzzleTypes.echo: {
       const correct = input == puzzle.data[0];
       if (correct) {
         puzzle.remainingOutput--;
@@ -92,7 +92,7 @@ export function validateOutput(puzzle: Puzzle, input: number) {
       }
       return puzzle.remainingData == 0;
     }
-    case "list-sort":
+    case PuzzleTypes.listSort:
       {
 
         const listToBeSorted = puzzle.data.slice(0, -1);
