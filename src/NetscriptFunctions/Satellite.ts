@@ -79,7 +79,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
         },
     lockOn:
       (ctx: NetscriptContext) =>
-        (_satellite, _horizontalAngle, _verticalAngle, _devOverride): boolean => {
+        (_satellite, _horizontalAngle, _verticalAngle, _devOverride = false): boolean => {
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
