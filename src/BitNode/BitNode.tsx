@@ -562,6 +562,21 @@ export function initBitNodes() {
       </>
     ),
   );
+  BitNodes.BitNode16 = new BitNode(
+    16,
+    "Hacking Satellites For Fun And Profit",
+    ":3",
+    (
+      <>
+        Imagine if this had orbtal mechanics
+      </>
+    ),
+    (
+      <>
+        Just more :3
+      </>
+    ),
+  );
 }
 
 export const defaultMultipliers = new BitNodeMultipliers();
@@ -1097,6 +1112,41 @@ export function getBitNodeMultipliers(n: number, lvl: number): BitNodeMultiplier
         DexterityLevelMultiplier: 0.7,
         AgilityLevelMultiplier: 0.7,
         CharismaLevelMultiplier: 1.1,
+
+        ServerMaxMoney: 0.8,
+        ServerStartingMoney: 0.5,
+        ServerStartingSecurity: 1.5,
+
+        AugmentationMoneyCost: 3,
+
+        CorporationValuation: 0.2,
+        CorporationSoftcap: 0.4,
+        CorporationDivisions: 0.4,
+
+        DaedalusAugsRequirement: 20,
+
+        BladeburnerRank: 0.2,
+        BladeburnerSkillCost: 3,
+
+        GangUniqueAugs: 0.3,
+
+        StaneksGiftPowerMultiplier: 0.7,
+        StaneksGiftExtraSize: -2,
+
+        WorldDaemonDifficulty: 2,
+      });
+    }
+
+    case 16: {
+      return new BitNodeMultipliers({
+        HackingLevelMultiplier: 0.6,
+        HackingSpeedMultiplier: 0.6,
+
+        StrengthLevelMultiplier: 0.7,
+        DefenseLevelMultiplier: 0.7,
+        DexterityLevelMultiplier: 0.7,
+        AgilityLevelMultiplier: 0.7,
+        CharismaLevelMultiplier: 0.7,
 
         ServerMaxMoney: 0.8,
         ServerStartingMoney: 0.5,

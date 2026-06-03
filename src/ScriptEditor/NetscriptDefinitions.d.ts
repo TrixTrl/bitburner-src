@@ -9675,6 +9675,7 @@ export interface Satellite {
   lockOn(satellite: string, horizontalAngle: number, verticalAngle: number, devOverride?: boolean): boolean;
   tick(satellite: string): void;
   info(satellite: string): SatelliteInfo;
+  dumpMemory(satellite: string): number[];
 }
 
 /**

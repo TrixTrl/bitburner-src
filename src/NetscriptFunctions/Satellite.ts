@@ -120,5 +120,15 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           }
           return getInfo(satelliteObject);
         },
+        dumpMemory:
+      (ctx: NetscriptContext) =>
+        (_satellite): number[] => {
+          const satellite = helpers.string(ctx, "satellite", _satellite);
+          const satelliteObject = Satellites.find((val) => val.name == satellite);
+          if (satelliteObject == undefined) {
+            throw helpers.errorMessage(ctx, `Could not find satellite`);
+          }
+          return satelliteObject.memory;
+        },
   }
 }

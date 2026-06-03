@@ -37,6 +37,9 @@ export function updatePuzzleData(puzzle: Puzzle, reading: boolean) {
           break;
         }
       default:
+        {
+          throw new Error(`Invalid satellite puzzle type: ${puzzle.name}`);
+        }
     }
   }
 }
@@ -82,16 +85,17 @@ export function validateOutput(puzzle: Puzzle, input: number) {
         }
         return puzzle.remainingData == 0;
       }
-    case PuzzleTypes.echo: {
-      const correct = input == puzzle.data[0];
-      if (correct) {
-        puzzle.remainingOutput--;
-      } else {
-        puzzle.remainingOutput = -1;
+    case PuzzleTypes.echo:
+      {
+        const correct = input == puzzle.data[0];
+        if (correct) {
+          puzzle.remainingOutput--;
+        } else {
+          puzzle.remainingOutput = -1;
 
+        }
+        return puzzle.remainingData == 0;
       }
-      return puzzle.remainingData == 0;
-    }
     case PuzzleTypes.listSort:
       {
 

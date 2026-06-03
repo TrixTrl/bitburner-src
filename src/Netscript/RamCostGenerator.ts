@@ -538,6 +538,7 @@ const satcom = {
   lockOn: 1,
   tick: 1,
   info: 1,
+  dumpMemory: 1,
 } as const;
 
 /** RamCosts guaranteed to match ns structure 1:1 (aside from args and enums).
