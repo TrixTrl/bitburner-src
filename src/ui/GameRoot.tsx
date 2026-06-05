@@ -79,6 +79,7 @@ import { SpecialServers } from "../Server/data/SpecialServers";
 import { ErrorModal } from "../ErrorHandling/ErrorModal";
 import { DWRoot } from "../DarkNet/DWRoot";
 import { DocumentationPopUp } from "../Documentation/ui/DocumentationPopUp";
+import { SatelliteRoot } from "../Satellite/ui/SatelliteRoot";
 
 const htmlLocation = location;
 
@@ -99,13 +100,13 @@ const MAX_PAGES_IN_HISTORY = 10;
 
 type RouterAction = (
   | {
-      type: "toPage";
-      page: Page;
-      context?: PageContext<ComplexPage>;
-    }
+    type: "toPage";
+    page: Page;
+    context?: PageContext<ComplexPage>;
+  }
   | {
-      type: "back";
-    }
+    type: "back";
+  }
 ) & { stackTrace: string | undefined };
 
 /**
@@ -478,6 +479,10 @@ export function GameRoot(): React.ReactElement {
     }
     case Page.DarkNet: {
       mainPage = <DWRoot />;
+      break;
+    }
+    case Page.Satellite: {
+      mainPage = <SatelliteRoot />;
       break;
     }
     case Page.Achievements: {
