@@ -1142,6 +1142,9 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
     b1tflum3: (ctx) => (_nextBN, _cbScript, _bitNodeOptions) => {
       helpers.checkSingularityAccess(ctx);
       const nextBN = helpers.number(ctx, "nextBN", _nextBN);
+      if (!validBitNodes.includes(nextBN)) {
+        throw new Error(`Invalid BitNode: ${_nextBN}.`);
+      }
       const cbScript = _cbScript
         ? resolveScriptFilePath(helpers.string(ctx, "cbScript", _cbScript), ctx.workerScript.name)
         : false;
