@@ -1,7 +1,7 @@
 import { Satellite as SatelliteAPI, SatelliteInfo } from "@nsdefs";
 import { InternalAPI, NetscriptContext } from "../Netscript/APIWrapper";
 import { helpers } from "../Netscript/NetscriptHelpers";
-import { Satellites } from "../Satellite/Satellites";
+import { Satellites, satellitesGenerated } from "../Satellite/Satellites";
 import { getInfo, tick } from "../Satellite/Satellite";
 
 export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
@@ -9,6 +9,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     sendToUplink:
       (ctx: NetscriptContext) =>
         (_satellite, _address, _value): Promise<boolean> => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const address = helpers.number(ctx, "address", _address);
           const value = helpers.number(ctx, "value", _value);
@@ -41,6 +42,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     readBuffer:
       (ctx: NetscriptContext) =>
         (_satellite): number[] => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const satelliteObject = Satellites.find((val) => val.name == satellite);
           if (satelliteObject == undefined) {
@@ -52,6 +54,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     readSignalStrength:
       (ctx: NetscriptContext) =>
         (_horizontalAngle, _verticalAngle): Promise<Map<string, number>> => {
+          checkAccess(ctx);
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
           if (verticalAngle < 0) {
@@ -80,6 +83,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     lockOn:
       (ctx: NetscriptContext) =>
         (_satellite, _horizontalAngle, _verticalAngle, _devOverride = false): boolean => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const horizontalAngle = helpers.number(ctx, "horizontalAngle", _horizontalAngle) % 360;
           const verticalAngle = helpers.number(ctx, "verticalAngle", _verticalAngle);
@@ -103,6 +107,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     tick:
       (ctx: NetscriptContext) =>
         (_satellite): void => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const satelliteObject = Satellites.find((val) => val.name == satellite);
           if (satelliteObject == undefined) {
@@ -113,6 +118,7 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
     info:
       (ctx: NetscriptContext) =>
         (_satellite): SatelliteInfo => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const satelliteObject = Satellites.find((val) => val.name == satellite);
           if (satelliteObject == undefined) {
@@ -120,9 +126,10 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           }
           return getInfo(satelliteObject);
         },
-        dumpMemory:
+    dumpMemory:
       (ctx: NetscriptContext) =>
         (_satellite): number[] => {
+          checkAccess(ctx);
           const satellite = helpers.string(ctx, "satellite", _satellite);
           const satelliteObject = Satellites.find((val) => val.name == satellite);
           if (satelliteObject == undefined) {
@@ -131,4 +138,9 @@ export function NetscriptSatellite(): InternalAPI<SatelliteAPI> {
           return satelliteObject.memory;
         },
   }
+}
+
+function checkAccess(ctx: NetscriptContext) {
+  if (satellitesGenerated) return;
+  throw helpers.errorMessage(ctx, `You do not have access to this API`);
 }

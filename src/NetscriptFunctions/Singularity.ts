@@ -553,7 +553,9 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
           return Router.toPage(Page.BitVerse, { flume: false, quick: false });
         }
         if ("solaris" === server.hostname) {  // something weird is going on with the special names, not sure how to handle this cleanly
-          server.pushProgram(CompletedProgramName.satcom);
+          if ((Player.activeSourceFiles.get(16) ?? 0) > 0 || Player.bitNodeN === 16) {
+            server.pushProgram(CompletedProgramName.satcom);
+          }
         }
         // Manunally check for faction invites
         Engine.Counters.checkFactionInvitations = 0;
@@ -955,8 +957,7 @@ export function NetscriptSingularity(): InternalAPI<ISingularity> {
         helpers.log(
           ctx,
           () =>
-            `You do not have enough favor to donate to this faction. Have ${
-              faction.favor
+            `You do not have enough favor to donate to this faction. Have ${faction.favor
             }, need ${favorNeededToDonate()}`,
         );
         return false;

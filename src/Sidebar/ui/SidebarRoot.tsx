@@ -72,6 +72,7 @@ import { throwIfReachable } from "../../utils/helpers/throwIfReachable";
 import { ErrorState } from "../../ErrorHandling/ErrorState";
 
 import { hasDarknetAccess } from "../../DarkNet/utils/darknetAuthUtils";
+import { satellitesGenerated } from "../../Satellite/Satellites";
 
 const RotatedDoubleArrowIcon = React.forwardRef(function RotatedDoubleArrowIcon(
   props: { color: "primary" | "secondary" | "error" },
@@ -179,6 +180,7 @@ export function SidebarRoot(props: { page: Page }): React.ReactElement {
   const canStaneksGift = Player.augmentations.some((aug) => aug.name === AugmentationName.StaneksGift1);
   const canIPvGO = playerHasDiscoveredGo();
   const canDarkNet = hasDarknetAccess();
+  const canSatellite = satellitesGenerated;
 
   const clickPage = useCallback(
     (page: Page) => {
@@ -416,7 +418,7 @@ export function SidebarRoot(props: { page: Page }): React.ReactElement {
             canGang && { key_: Page.Gang, icon: SportsMmaIcon },
             canIPvGO && { key_: Page.Go, icon: BorderInnerSharpIcon },
             canDarkNet && { key_: Page.DarkNet, icon: ShareIcon },
-            { key_: Page.Satellite, icon: ShareIcon },
+            canSatellite && { key_: Page.Satellite, icon: ShareIcon },
           ]}
         />
         <Typography id="sidebar-extra-hook-2"></Typography>

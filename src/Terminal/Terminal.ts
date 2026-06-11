@@ -387,7 +387,9 @@ export class Terminal {
         return;
       }
       if ("solaris" === server.hostname) {  // something weird is going on with the special names, not sure how to handle this cleanly
-        server.pushProgram(CompletedProgramName.satcom);
+        if ((Player.activeSourceFiles.get(16) ?? 0) > 0 || Player.bitNodeN === 16) {
+          server.pushProgram(CompletedProgramName.satcom);
+        }
       }
       // Manunally check for faction invites
       Engine.Counters.checkFactionInvitations = 0;
