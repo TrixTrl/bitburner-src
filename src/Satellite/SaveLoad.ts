@@ -1,6 +1,6 @@
 import { assertObject } from "../utils/TypeAssertion";
 import { Satellite } from "./Satellite";
-import { Satellites } from "./Satellites";
+import { Satellites, setLoadedSatellites } from "./Satellites";
 
 export type SatelliteSaveFormat = {
   satellites: Satellite[];
@@ -20,12 +20,10 @@ export function loadSatellites(saveString: unknown): void {
     const parsedData: unknown = JSON.parse(saveString);
     assertObject(parsedData);
     const { satellites } = parsedData;
-    if (!Array.isArray(satellites) ) {
+    if (!Array.isArray(satellites)) {
       throw new Error(`Invalid satellites: ${satellites}`);
     }
-    for (const sat of satellites) {
-      Satellites.push(sat as Satellite);
-    }
+    setLoadedSatellites(satellites as Satellite[]);
 
   } catch (error) {
     console.error(error);

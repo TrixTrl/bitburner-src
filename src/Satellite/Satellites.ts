@@ -13,3 +13,10 @@ export function regenerateSatellites(amount: number) {
   }
   satellitesGenerated = true;
 }
+
+export function setLoadedSatellites(data: Satellite[]) {
+  for (const sat of data) {
+    Satellites.push(sat);
+  }
+  if (Satellites.length > 0) satellitesGenerated = true;
+}

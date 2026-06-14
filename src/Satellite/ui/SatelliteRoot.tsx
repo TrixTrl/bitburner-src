@@ -4,6 +4,8 @@ import { Container, Tab, Tabs } from "@mui/material";
 import { BorderInnerSharp, ManageSearch, History } from "@mui/icons-material";
 import { satelliteStyles } from "./SatelliteStyles";
 import { SatelliteTrackingPage } from "./SatelliteTrackingPage";
+import { AssemblerPage } from "./AssemblerPage";
+import { SimulatorPage } from "./SimulatorPage";
 
 export function SatelliteRoot(): React.ReactElement {
   const { classes } = satelliteStyles({});
@@ -21,8 +23,8 @@ export function SatelliteRoot(): React.ReactElement {
         <Tab label="Simulator" icon={<History />} iconPosition={"start"} className={classes.tab} />
         </Tabs>
       {value === 0 && <SatelliteTrackingPage/>}
-      {value === 1 && <div />}
-      {value === 2 && <div />}
+      {value === 1 && <AssemblerPage />}
+      {value === 2 && <SimulatorPage />}
     </Container>
   );
 }
