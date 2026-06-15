@@ -1,7 +1,11 @@
+import { EventEmitter } from "../utils/EventEmitter";
 import { corruptMemory, Satellite } from "./Satellite";
 
 export let Satellites: Satellite[] = [];
 export let satellitesGenerated = false;
+
+export const SimulatorSatellite = new Satellite;
+export const SatelliteEvents = new EventEmitter();
 
 export function regenerateSatellites(amount: number) {
   Satellites = [];
