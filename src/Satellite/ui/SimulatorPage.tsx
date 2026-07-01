@@ -12,15 +12,18 @@ export const SimulatorPage = (): React.ReactElement => {
     initialMemory.push([]);
     for (let j = 0; j < 8; j++) {
       initialMemory[i].push(0);
+      //SimulatorSatellite.memory[j + i * 8] = j + i * 8;
     }
   }
+
+  let index = 0;
 
   return <div>
     <Grid container columns={initialMemory.length}>
       {initialMemory.map((row, outerIndex) => {
         return <Grid item key={outerIndex}>
-          {row.map((value, innerIndex) => {
-            return MemoryCell({ x: outerIndex, y: innerIndex });
+          {row.map(() => {
+            return MemoryCell({ index: index++ });
           })}
         </Grid>
       })}
@@ -29,26 +32,25 @@ export const SimulatorPage = (): React.ReactElement => {
 };
 
 type MemoryCellProps = {
-  x: number,
-  y: number,
+  index: number;
 };
 
-export function MemoryCell({ x, y }: MemoryCellProps): React.ReactElement {
+export function MemoryCell({ index }: MemoryCellProps): React.ReactElement {
   const rerender = useRerender();
   useEffect(() => SatelliteEvents.subscribe(() => rerender()));
 
   const updateCell = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
     if (value == value) {
-      SimulatorSatellite.memory[x + y * 8] = value;
+      SimulatorSatellite.memory[index] = value;
       SatelliteEvents.emit();
     }
   }
 
   return (
-    <div style={{ maxWidth:150 }}>
+    <div style={{ maxWidth: 150 }}>
       <Input
-        value={SimulatorSatellite.memory[x + y * 8]}
+        value={SimulatorSatellite.memory[index]}
         onChange={updateCell}
       />
     </div>
