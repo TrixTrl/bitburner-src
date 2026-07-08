@@ -118,6 +118,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Literatures } from "./Literature/Literatures";
 import { Messages } from "./Message/MessageHelpers";
 import { setDeprecatedProperties } from "./utils/DeprecationHelper";
+import { NetscriptTraveler } from "./NetscriptFunctions/Traveler";
 
 export const enums: NSEnums = {
   CityName,
@@ -164,6 +165,7 @@ export const ns: InternalAPI<NSFull> = {
   grafting: NetscriptGrafting(),
   hacknet: NetscriptHacknet(),
   cloud: NetscriptCloud(),
+  traveler: NetscriptTraveler(),
   sprintf:
     (ctx) =>
     (_format, ...args) => {

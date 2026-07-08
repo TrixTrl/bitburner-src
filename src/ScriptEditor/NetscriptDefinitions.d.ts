@@ -7266,6 +7266,11 @@ export interface NS {
   readonly grafting: Grafting;
 
   /**
+   *
+   */
+  readonly traveler: Traveler;
+
+  /**
    * Arguments passed into the script.
    *
    * These arguments can be accessed as a normal array by using the `[]` operator
