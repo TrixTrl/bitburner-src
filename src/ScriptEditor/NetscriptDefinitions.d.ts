@@ -11146,6 +11146,49 @@ interface InvestmentOffer {
   round: number;
 }
 
+export type TravelerNode = {
+  id: number;
+  connectionLimit: number;
+  connectedTo: number;
+  position: { x: number, y: number };
+  nodeType: "PRODUCER" | "CONNECTOR" | "MULTIPLIER" | "NEXUS";
+  power: number;
+};
+/**
+ * Proof Of Concept namespace
+ * @public
+ */
+export interface Traveler {
+  /**
+   * Generates a new network with the given number of nodes
+   */
+  generateFreshNetwork(nodeCount: number): void;
+  /**
+   * Generate a new node of a spesific type
+   */
+  generateNewNode(nodeType: "PRODUCER" | "CONNECTOR" | "MULTIPLIER"): number;
+  /**
+   * Get all nodes
+   */
+  getNodes(): TravelerNode[];
+  /**
+   * Links one node to another, returns if the link was succesfull
+   */
+  linkNode(linkingNodeId: number, targetNodeId: number): boolean;
+  /**
+   * Unlinks node from the node it's connected to
+   */
+  unlinkNode(nodeId: number): void;
+  /**
+   * Unlinks all nodes connected to the passed in node from said node. Returns the number of severed links
+   */
+  unlinkIncomming(nodeId: number): number;
+  /**
+   * Profiles the power of the network
+   */
+  profile(): number;
+}
+
 /**
  * Interface Theme
  * @public
