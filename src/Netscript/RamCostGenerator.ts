@@ -539,8 +539,8 @@ const corporation = {
 } as const;
 
 const traveler = {
-  generateFreshNetwork: 1,
-  generateNewNode: 1,
+  dev_generateFreshNetwork: 1,
+  dev_generateNewNode: 1,
   getNodes: 1,
   linkNode: 1,
   unlinkNode: 1,

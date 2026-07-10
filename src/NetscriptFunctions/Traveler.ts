@@ -9,7 +9,7 @@ export function NetscriptTraveler(): InternalAPI<TravelerAPI> {
     /**
      * Generates a new network with the given number of nodes
      */
-    generateFreshNetwork: (ctx) =>
+    dev_generateFreshNetwork: (ctx) =>
       (nodeCount_): void => {
         const nodeCount = helpers.positiveNumber(ctx, "nodeCount", nodeCount_);
         Nodes.splice(0);
@@ -62,9 +62,9 @@ export function NetscriptTraveler(): InternalAPI<TravelerAPI> {
         }
       },
     /**
-* Generate a new node of a spesific type
-*/
-    generateNewNode: (ctx) => (nodeType): number => {
+     * Generate a new node of a spesific type
+     */
+    dev_generateNewNode: (ctx) => (nodeType): number => {
       if (!["PRODUCER", "CONNECTOR", "MULTIPLIER"].find(type => type == nodeType)) throw new Error(`Invalid node type: ${nodeType}`);
       if (nodeType == "MULTIPLIER") {
         Nodes.push(

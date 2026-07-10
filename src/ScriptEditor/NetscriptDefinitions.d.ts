@@ -11167,11 +11167,11 @@ export interface Traveler {
   /**
    * Generates a new network with the given number of nodes
    */
-  generateFreshNetwork(nodeCount: number): void;
+  dev_generateFreshNetwork(nodeCount: number): void;
   /**
-   * Generate a new node of a spesific type
+   * Generate a new node of a specific type
    */
-  generateNewNode(nodeType: "PRODUCER" | "CONNECTOR" | "MULTIPLIER"): number;
+  dev_generateNewNode(nodeType: "PRODUCER" | "CONNECTOR" | "MULTIPLIER"): number;
   /**
    * Get all nodes
    */
