@@ -416,6 +416,7 @@ export function SidebarRoot(props: { page: Page }): React.ReactElement {
             canGang && { key_: Page.Gang, icon: SportsMmaIcon },
             canIPvGO && { key_: Page.Go, icon: BorderInnerSharpIcon },
             canDarkNet && { key_: Page.DarkNet, icon: ShareIcon },
+            { key_: Page.Botnet, icon: ShareIcon },
           ]}
         />
         <Typography component="div" id="sidebar-extra-hook-2"></Typography>

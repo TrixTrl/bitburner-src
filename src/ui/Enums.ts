@@ -40,6 +40,7 @@ export enum SimplePage {
   Recovery = "Recovery",
   Achievements = "Achievements",
   ThemeBrowser = "Theme Browser",
+  Botnet = "Botnet",
 }
 
 export enum ComplexPage {

@@ -79,6 +79,7 @@ import { ErrorModal } from "../ErrorHandling/ErrorModal";
 import { DWRoot } from "../DarkNet/DWRoot";
 import { DocumentationPopUp } from "../Documentation/ui/DocumentationPopUp";
 import { CustomPage } from "./CustomPage";
+import { BotnetRoot } from "../POC/ui/BotnetRoot";
 
 const htmlLocation = location;
 
@@ -477,6 +478,10 @@ export function GameRoot(): React.ReactElement {
     }
     case Page.DarkNet: {
       mainPage = <DWRoot />;
+      break;
+    }
+    case Page.Botnet: {
+      mainPage = <BotnetRoot />;
       break;
     }
     case Page.Achievements: {
