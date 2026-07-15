@@ -7,7 +7,7 @@ import React, {
   type PointerEventHandler,
   type WheelEventHandler,
 } from "react";
-import { Container, Typography, Button, Box, Tooltip } from "@mui/material";
+import { Container, Button } from "@mui/material";
 import { ZoomIn, ZoomOut } from "@mui/icons-material";
 import { throttle } from "lodash";
 //import { ServerStatusBox } from "./ServerStatusBox";
@@ -16,6 +16,7 @@ import { useRerender } from "../../ui/React/hooks";
 //import { SpecialServers } from "../../Server/data/SpecialServers";
 import { drawOnCanvas } from "./NetworkCanvas";
 import { dnetStyles } from "../../DarkNet/ui/dnetStyles";
+import { BotnetState, BotnetEvents } from "../BotnetState";
 //import { getLabyrinthDetails, isLabyrinthServer } from "../effects/labyrinth";
 //import { DarknetServer } from "../../Server/DarknetServer";
 //import { getAllDarknetServers, getBackdooredDarknetServers } from "../utils/darknetNetworkUtils";
@@ -48,10 +49,10 @@ export function NetworkDisplayWrapper(): React.ReactElement {
   //const labyrinth = labDetails.lab;
   //const labDepth = labDetails.depth;
 
-  /*const scrollTo = useCallback(
+  const scrollTo = useCallback(
     (top: number, left: number) => {
-      DarknetState.netViewTopScroll = top;
-      DarknetState.netViewLeftScroll = left;
+      BotnetState.netViewTopScroll = top;
+      BotnetState.netViewLeftScroll = left;
 
       draggableBackground?.current?.scrollTo({
         top: top,
@@ -60,7 +61,7 @@ export function NetworkDisplayWrapper(): React.ReactElement {
       });
     },
     [draggableBackground],
-  );*/
+  );
 
   const updateDisplay = useCallback(() => {
     if (!canvas.current) {
@@ -80,31 +81,37 @@ export function NetworkDisplayWrapper(): React.ReactElement {
   }, [rerender]);
 
   useEffect(() => {
-    //const clearSubscription = DarknetEvents.subscribe(() => updateDisplay());
+    const clearSubscription = BotnetEvents.subscribe(() => updateDisplay());
     draggableBackground.current?.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
-    //scrollTo(DarknetState.netViewTopScroll, DarknetState.netViewLeftScroll);
+    scrollTo(BotnetState.netViewTopScroll, BotnetState.netViewLeftScroll);
     updateDisplay();
 
     return () => {
-      //clearSubscription();
+      clearSubscription();
     };
-  }, [updateDisplay, rerender]);
+  }, [updateDisplay, rerender, scrollTo]);
 
   const handleDragStart: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
     const target = pointerEvent.target as HTMLDivElement;
     const background = draggableBackground.current;
-    if (target.id === "draggableBackgroundTarget") {
+    if (target.id === "botnetNetworkDisplay") {
       background?.setPointerCapture(pointerEvent.pointerId);
     }
+    BotnetState.clickBeginX = pointerEvent.clientX;
+    BotnetState.clickBeginY = pointerEvent.clientY;
   };
 
   const handleDragEnd: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
     const target = pointerEvent.target as HTMLDivElement;
     const background = draggableBackground.current;
-    if (target.id === "draggableBackgroundTarget") {
+    if (target.id === "botnetNetworkDisplay") {
       background?.releasePointerCapture(pointerEvent.pointerId);
     }
-    //DarknetEvents.emit();
+    const travelDist = Math.sqrt(Math.pow(BotnetState.clickBeginX - pointerEvent.clientX, 2) + Math.pow(BotnetState.clickBeginY - pointerEvent.clientY, 2));
+    if (travelDist < 5) {
+      handleClick(pointerEvent);
+    }
+    BotnetEvents.emit();
   };
 
   const handleDrag: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
@@ -114,6 +121,16 @@ export function NetworkDisplayWrapper(): React.ReactElement {
     }
   };
 
+  const handleClick: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
+    console.log({ x: pointerEvent.clientX, y: pointerEvent.clientY });
+    const target = pointerEvent.target as HTMLDivElement;
+    console.log(target);
+    if (target.id === "botnetNetworkDisplay") {
+      const rect = target.getBoundingClientRect();
+      console.log({ x: (pointerEvent.clientX - rect.x) * zoomOptions[BotnetState.zoomIndex] + BotnetState.netViewLeftScroll, y: (pointerEvent.clientY - rect.y) * zoomOptions[BotnetState.zoomIndex] + BotnetState.netViewTopScroll });
+    }
+  }
+
   const changeZoom = useCallback(
     (out = true, mouseX?: number, mouseY?: number) => {
       if (out && zoomIndex <= 0) return;
@@ -121,7 +138,7 @@ export function NetworkDisplayWrapper(): React.ReactElement {
       const newZoomIndex = out ? zoomIndex - 1 : zoomIndex + 1;
       const oldZoom = zoomOptions[zoomIndex];
       const newZoom = zoomOptions[newZoomIndex];
-      //DarknetState.zoomIndex = newZoomIndex;
+      BotnetState.zoomIndex = newZoomIndex;
       setZoomIndex(newZoomIndex);
       const background = draggableBackground.current;
       const mx = mouseX ?? (background?.clientWidth ?? 0) / 2;
@@ -131,7 +148,7 @@ export function NetworkDisplayWrapper(): React.ReactElement {
         (((background?.scrollLeft ?? 0) + mx) / oldZoom) * newZoom - mx,
       );
     },
-    [zoomIndex, setZoomIndex, zoomOptions],
+    [zoomIndex, setZoomIndex, zoomOptions, scrollTo],
   );
 
   const zoom = useCallback(
@@ -182,7 +199,7 @@ export function NetworkDisplayWrapper(): React.ReactElement {
             zoom: zoomOptions[zoomIndex],
             cursor: "grab",
           }}
-          id={"draggableBackgroundTarget"}
+          id={"botnetNetworkDisplay"}
         >
           <canvas
             ref={canvas}

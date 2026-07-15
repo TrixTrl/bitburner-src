@@ -11,9 +11,18 @@ export const drawOnCanvas = (canvas: HTMLCanvasElement) => {
 
 
   for (const node of Nodes) {
+    if (node.connectedTo == -1) continue;
+    ctx.beginPath();
+    ctx.strokeStyle = "white";
+    const startPosition = translatePos(node, canvas);
+    const endPosition = translatePos(Nodes[node.connectedTo], canvas);
+    ctx.moveTo(startPosition.x, startPosition.y);
+    ctx.lineTo(endPosition.x, endPosition.y);
+    ctx.stroke();
+  }
+  for (const node of Nodes) {
     const drawPosition = translatePos(node, canvas);
-    console.log(drawPosition);
-    //const drawPosition = { x: 100, y: 100 };
+    //console.log(drawPosition);
     ctx.beginPath();
     switch (node.nodeType) {
       case "PRODUCER":
@@ -29,43 +38,9 @@ export const drawOnCanvas = (canvas: HTMLCanvasElement) => {
         ctx.fillStyle = "white";
         break;
     }
-    //ctx.fillStyle = "blue";
     ctx.ellipse(drawPosition.x, drawPosition.y, 30, 30, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  /*for (const server of DarknetState.Network.flat()) {
-    if (
-      !server ||
-      // Servers in DarknetState.Network are not labyrinth servers, so it's fine to check server.depth.
-      server.depth >= netDisplayDepth ||
-      (!server.hasAdminRights && !server.serversOnNetwork.find((s) => getDarknetServerOrThrow(s).hasAdminRights))
-    ) {
-      continue;
-    }
-
-    // Draw a line between each server and its connected servers
-    for (const connectedServerName of server.serversOnNetwork) {
-      const connectedServer = getDarknetServerOrThrow(connectedServerName);
-      // With labyrinth servers, server.depth is always -1, so we need to check labDepth.
-      const connectedServerDepth = isLabyrinthServer(connectedServerName) ? labDepth : connectedServer.depth;
-      if (
-        connectedServerDepth >= netDisplayDepth ||
-        (!connectedServer.hasAdminRights &&
-          !connectedServer.serversOnNetwork.find((s) => getDarknetServerOrThrow(s).hasAdminRights))
-      ) {
-        continue;
-      }
-      ctx.beginPath();
-      const connectedColor = "green";
-      const disconnectedColor = "grey";
-      ctx.strokeStyle = server.hasAdminRights || connectedServer.hasAdminRights ? connectedColor : disconnectedColor;
-      const startPosition = getPixelPosition(server, true);
-      const endPosition = getPixelPosition(connectedServer, true);
-      ctx.moveTo(startPosition.left, startPosition.top);
-      ctx.lineTo(endPosition.left, endPosition.top);
-      ctx.stroke();
-    }
-  }*/
 };
 
 function translatePos(node: TravelerNode, canvas: HTMLCanvasElement): { x: number, y: number } {
