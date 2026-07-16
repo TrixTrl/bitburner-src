@@ -1,3 +1,4 @@
+import { TravelerNode } from "../ScriptEditor/NetscriptDefinitions";
 import { EventEmitter } from "../utils/EventEmitter";
 
 export const BotnetEvents = new EventEmitter<[]>();
@@ -9,4 +10,6 @@ export const BotnetState = {
 
   clickBeginX: 0,
   clickBeginY: 0,
+
+  selectedNode: undefined as TravelerNode | undefined,
 }

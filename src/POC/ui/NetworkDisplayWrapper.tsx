@@ -14,9 +14,11 @@ import { throttle } from "lodash";
 import { useRerender } from "../../ui/React/hooks";
 //import { DarknetEvents, DarknetState } from "../models/DarknetState";
 //import { SpecialServers } from "../../Server/data/SpecialServers";
-import { drawOnCanvas } from "./NetworkCanvas";
+import { drawOnCanvas, translatePos } from "./NetworkCanvas";
 import { dnetStyles } from "../../DarkNet/ui/dnetStyles";
 import { BotnetState, BotnetEvents } from "../BotnetState";
+import { Nodes } from "../Nodes";
+import { linkNode, profileBotnet } from "../Node";
 //import { getLabyrinthDetails, isLabyrinthServer } from "../effects/labyrinth";
 //import { DarknetServer } from "../../Server/DarknetServer";
 //import { getAllDarknetServers, getBackdooredDarknetServers } from "../utils/darknetNetworkUtils";
@@ -29,7 +31,7 @@ import { BotnetState, BotnetEvents } from "../BotnetState";
 //import { Settings } from "../../Settings/Settings";
 
 const DW_NET_WIDTH = 6000;
-const DW_NET_HEIGHT = 12000;
+const DW_NET_HEIGHT = 6000;
 //const initialSearchLabel = `Search:`;
 
 export function NetworkDisplayWrapper(): React.ReactElement {
@@ -51,6 +53,7 @@ export function NetworkDisplayWrapper(): React.ReactElement {
 
   const scrollTo = useCallback(
     (top: number, left: number) => {
+      return;
       BotnetState.netViewTopScroll = top;
       BotnetState.netViewLeftScroll = left;
 
@@ -92,7 +95,13 @@ export function NetworkDisplayWrapper(): React.ReactElement {
   }, [updateDisplay, rerender, scrollTo]);
 
   const handleDragStart: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
-    const target = pointerEvent.target as HTMLDivElement;
+    let target = pointerEvent.target as HTMLDivElement;
+    for (const child of target.children) {
+      if (child.id === "botnetNetworkDisplay") {
+        target = child as HTMLDivElement;
+        break;
+      }
+    }
     const background = draggableBackground.current;
     if (target.id === "botnetNetworkDisplay") {
       background?.setPointerCapture(pointerEvent.pointerId);
@@ -102,7 +111,13 @@ export function NetworkDisplayWrapper(): React.ReactElement {
   };
 
   const handleDragEnd: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
-    const target = pointerEvent.target as HTMLDivElement;
+    let target = pointerEvent.target as HTMLDivElement;
+    for (const child of target.children) {
+      if (child.id === "botnetNetworkDisplay") {
+        target = child as HTMLDivElement;
+        break;
+      }
+    }
     const background = draggableBackground.current;
     if (target.id === "botnetNetworkDisplay") {
       background?.releasePointerCapture(pointerEvent.pointerId);
@@ -122,12 +137,48 @@ export function NetworkDisplayWrapper(): React.ReactElement {
   };
 
   const handleClick: PointerEventHandler<HTMLDivElement> = (pointerEvent) => {
-    console.log({ x: pointerEvent.clientX, y: pointerEvent.clientY });
-    const target = pointerEvent.target as HTMLDivElement;
-    console.log(target);
+    //console.log({ x: pointerEvent.clientX, y: pointerEvent.clientY });
+    let target = pointerEvent.target as HTMLDivElement;
+    //console.log(target);
+    for (const child of target.children) {
+      if (child.id === "botnetNetworkDisplay") {
+        target = child as HTMLDivElement;
+        break;
+      }
+    }
     if (target.id === "botnetNetworkDisplay") {
       const rect = target.getBoundingClientRect();
-      console.log({ x: (pointerEvent.clientX - rect.x) * zoomOptions[BotnetState.zoomIndex] + BotnetState.netViewLeftScroll, y: (pointerEvent.clientY - rect.y) * zoomOptions[BotnetState.zoomIndex] + BotnetState.netViewTopScroll });
+      //console.log(rect);
+      //console.log(BotnetState);
+      const clickPosition = { x: (pointerEvent.clientX - rect.x + BotnetState.netViewLeftScroll) / zoomOptions[BotnetState.zoomIndex], y: (pointerEvent.clientY - rect.y + BotnetState.netViewTopScroll) / zoomOptions[BotnetState.zoomIndex] };
+      //console.log(clickPosition);
+      let smallestNode;
+      let smallestDistance = Infinity;
+      for (const node of Nodes) {
+        const nodePosition = translatePos(node, DW_NET_WIDTH, DW_NET_HEIGHT);
+        const dist = Math.sqrt(Math.pow(nodePosition.x - clickPosition.x, 2) + Math.pow(nodePosition.y - clickPosition.y, 2));
+        if (dist < smallestDistance) {
+          smallestDistance = dist;
+          smallestNode = node;
+        }
+      }
+      //console.log(smallestDistance);
+      //console.log(smallestNode);
+      if (smallestNode && smallestDistance <= 50) {
+        if (!BotnetState.selectedNode) {
+          BotnetState.selectedNode = smallestNode;
+        } else {
+          if (BotnetState.selectedNode.id == smallestNode.id) {
+            BotnetState.selectedNode.connectedTo = -1;
+            console.log(profileBotnet());
+          } else if (linkNode(BotnetState.selectedNode.id, smallestNode.id)) {
+            BotnetState.selectedNode = undefined;
+            console.log(profileBotnet());
+          }
+        }
+      } else {
+        BotnetState.selectedNode = undefined;
+      }
     }
   }
 
