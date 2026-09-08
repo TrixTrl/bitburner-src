@@ -10,11 +10,12 @@
  * This subcomponent creates all of the buttons for interacting with those special
  * properties
  */
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
-import { Location } from "../Location";
+import type { Location } from "../Location";
+import { Locations } from "../Locations";
 import { CreateCorporationModal } from "../../Corporation/ui/modals/CreateCorporationModal";
 import { AugmentationName, CompletedProgramName, FactionName, LocationName, ToastVariant } from "@enums";
 import { Factions } from "../../Faction/Factions";
@@ -48,22 +49,44 @@ interface SpecialLocationProps {
   loc: Location;
 }
 
-export function SpecialLocation(props: SpecialLocationProps): React.ReactElement {
-  const rerender = useRerender();
-
-  // Special Location Hints
-  function specialLocationNextBNHint(bn_number: number): React.ReactElement {
-    if (knowAboutBitverse()) {
-      return (
-        <>
-          <br />
-          <br />
-          <Typography>You should check out BN-{bn_number} to uncover more details about this place.</Typography>
-        </>
-      );
-    }
+function SpecialLocationHint(bitNode: number): React.ReactElement {
+  let message;
+  switch (bitNode) {
+    case 3:
+      if (Player.bitNodeOptions.disableCorporation) {
+        message = "You disabled Corporation via BitNode advanced options.";
+      } else if (currentNodeMults.CorporationSoftcap < 0.15) {
+        message = `Corporation is disabled in BN-${Player.bitNodeN}.`;
+      }
+      break;
+    case 6:
+    case 7:
+      if (Player.bitNodeOptions.disableBladeburner) {
+        message = "You disabled Bladeburner via BitNode advanced options.";
+      } else if (currentNodeMults.BladeburnerRank === 0) {
+        message = `Bladeburner is disabled in BN-${Player.bitNodeN}.`;
+      }
+      break;
+  }
+  if (!message && knowAboutBitverse()) {
+    message = `You should check out ${
+      bitNode !== 6 ? `BN-${bitNode}` : `BN-6 or BN-7`
+    } to uncover more details about this place.`;
+  }
+  if (!message) {
     return <></>;
   }
+  return (
+    <>
+      <br />
+      <br />
+      <Typography>{message}</Typography>
+    </>
+  );
+}
+
+export function SpecialLocation(props: SpecialLocationProps): React.ReactElement {
+  const rerender = useRerender();
 
   // Apply for Bladeburner division
   const joinBladeburnerDivision = useCallback(() => {
@@ -118,9 +141,7 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
 
   function renderBladeburner(): React.ReactElement {
     if (!Player.canAccessBladeburner() || currentNodeMults.BladeburnerRank === 0) {
-      {
-        return specialLocationNextBNHint(6);
-      }
+      return SpecialLocationHint(6);
     }
     const text = Player.bladeburner ? "Enter Bladeburner Headquarters" : "Apply to Bladeburner Division";
     return (
@@ -176,13 +197,13 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
 
   function CreateCorporation(): React.ReactElement {
     const [open, setOpen] = useState(false);
-    if (!Player.canAccessCorporation()) {
+    if (!Player.canAccessCorporation() || currentNodeMults.CorporationSoftcap < 0.15) {
       return (
         <>
           <Typography>
             <i>A businessman is yelling at a clerk. You should come back later.</i>
           </Typography>
-          {specialLocationNextBNHint(3)}
+          {SpecialLocationHint(3)}
         </>
       );
     }
@@ -198,9 +219,7 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
 
   function renderGrafting(): React.ReactElement {
     if (!Player.canAccessGrafting()) {
-      {
-        return specialLocationNextBNHint(10);
-      }
+      return SpecialLocationHint(10);
     }
     return (
       <Button onClick={handleGrafting} sx={{ my: 5 }}>
@@ -315,7 +334,7 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
 
           <br />
           {symbol}
-          <Typography>{specialLocationNextBNHint(13)}</Typography>
+          {SpecialLocationHint(13)}
         </>
       );
     }
@@ -350,7 +369,19 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
     );
   }
 
-  function renderGlitch(): React.ReactElement {
+  function RenderGlitch(): React.ReactElement {
+    // If the user stays here for ~25 seconds, silently warp them to The Void.
+    useEffect(() => {
+      let delay = 0;
+      // This is a sum of 25 exponential random variables, which is equivalent
+      // to one Erlang-distributed random variable with mean 25sec and stddev 5sec.
+      for (let i = 0; i < 25; ++i) {
+        delay += -1000 * Math.log(1 - Math.random());
+      }
+      const id = setTimeout(() => Router.toPage(Page.Location, { location: Locations[LocationName.Void] }), delay);
+      return () => clearTimeout(id);
+    });
+
     return (
       <>
         <Typography>
@@ -416,7 +447,7 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
       return renderGrafting();
     }
     case LocationName.Sector12CityHall: {
-      return (currentNodeMults.CorporationSoftcap < 0.15 && <></>) || <CreateCorporation />;
+      return <CreateCorporation />;
     }
     case LocationName.Sector12NSA: {
       return renderBladeburner();
@@ -428,7 +459,7 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
       return renderCotMG();
     }
     case LocationName.IshimaGlitch: {
-      return renderGlitch();
+      return <RenderGlitch />;
     }
     case LocationName.NewTokyoArcade: {
       return <ArcadeRoot />;
@@ -446,6 +477,17 @@ export function SpecialLocation(props: SpecialLocationProps): React.ReactElement
     }
     case LocationName.ChongqingShadowedWalkway: {
       return renderShadowedWalkway();
+    }
+    case LocationName.Void: {
+      // Reserved for special content such as easter eggs.
+      // Player.giveAchievement() may render a toast while React is rendering this component. This causes a state update
+      // during rendering, which triggers the following React warning: "Cannot update during an existing state
+      // transition (such as within `render`). Render methods should be a pure function of props and state."
+      // Therefore, we defer the call until after the current render completes.
+      setTimeout(() => {
+        Player.giveAchievement("THE_VOID");
+      }, 0);
+      return <></>;
     }
     default:
       console.error(`Location ${props.loc.name} doesn't have any special properties`);

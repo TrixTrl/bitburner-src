@@ -314,7 +314,7 @@ interface RunningScript {
 interface RunOptions {
   /** Number of threads that the script will run with, defaults to 1 */
   threads?: number;
-  /** Whether this script is excluded from saves, defaults to false */
+  /** Whether this script is excluded from saves and the "Recently Killed" tab in Active Scripts, defaults to false */
   temporary?: boolean;
   /**
    * The RAM allocation to launch each thread of the script with.
@@ -404,15 +404,19 @@ interface CrimeStats {
  * @public
  */
 interface BasicHGWOptions {
-  /** Number of threads to use for this function.
+  /**
+   * Number of threads to use for this function.
    * Must be less than or equal to the number of threads the script is running with.
    * Accepts positive non integer values.
+   * Defaults to the number of threads the script is running with.
    */
   threads?: number;
-  /** Set to true this action will affect the stock market. */
+  /** Whether to make this action affect the stock market. Defaults to false. */
   stock?: boolean;
-  /** Number of additional milliseconds that will be spent waiting between the start of the function and when it
-   * completes. */
+  /**
+   * Number of additional milliseconds that will be spent waiting between the start of the function and when it
+   * completes. Defaults to 0.
+   */
   additionalMsec?: number;
 }
 
@@ -849,6 +853,40 @@ interface BladeburnerCurAction {
   name: string;
 }
 
+/** @public */
+export type GangTaskNameEnumType = {
+  Unassigned: "Unassigned";
+
+  Ransomware: "Ransomware";
+  Phishing: "Phishing";
+  IdentityTheft: "Identity Theft";
+  DDoSAttacks: "DDoS Attacks";
+  PlantVirus: "Plant Virus";
+  FraudAndCounterfeiting: "Fraud & Counterfeiting";
+  MoneyLaundering: "Money Laundering";
+  Cyberterrorism: "Cyberterrorism";
+  EthicalHacking: "Ethical Hacking";
+
+  MugPeople: "Mug People";
+  DealDrugs: "Deal Drugs";
+  StrongarmCivilians: "Strongarm Civilians";
+  RunACon: "Run a Con";
+  ArmedRobbery: "Armed Robbery";
+  TraffickIllegalArms: "Traffick Illegal Arms";
+  ThreatenAndBlackmail: "Threaten & Blackmail";
+  HumanTrafficking: "Human Trafficking";
+  Terrorism: "Terrorism";
+  VigilanteJustice: "Vigilante Justice";
+
+  TrainCombat: "Train Combat";
+  TrainHacking: "Train Hacking";
+  TrainCharisma: "Train Charisma";
+  TerritoryWarfare: "Territory Warfare";
+};
+
+/** @public */
+type GangTaskName = _ValueOf<GangTaskNameEnumType>;
+
 /**
  * Gang general info.
  * @public
@@ -1173,8 +1211,13 @@ export type SleeveTask =
   | SleeveSupportTask
   | SleeveSynchroTask;
 
-/** Object representing a port. A port is a serialized queue.
- * @public */
+/**
+ * Object representing a port. A port is a serialized queue.
+ *
+ * All methods in this interface can be used while the ns instance is "busy" (they avoid the concurrency check), or even
+ * when it is dead.
+ * @public
+ */
 export interface NetscriptPort {
   /** Write data to a port.
    * @remarks
@@ -1932,15 +1975,25 @@ export interface Singularity {
   exportGame(): Promise<void>;
 
   /**
-   * Returns Backup save bonus availability.
+   * Returns whether the Export Game bonus is available.
+   *
+   * This function is deprecated and will be removed in a later version.
+   *
+   * @deprecated
+   * Use {@link Singularity.hasExportGameBonus | hasExportGameBonus} instead.
+   *
    * @remarks
    * RAM cost: 0.5 GB * 16/4/1
-   *
-   *
-   * This function will check if there is a bonus for backing up your save.
-   *
    */
   exportGameBonus(): boolean;
+
+  /**
+   * Returns whether the Export Game bonus is available.
+   *
+   * @remarks
+   * RAM cost: 0.5 GB * 16/4/1
+   */
+  hasExportGameBonus(): boolean;
 
   /**
    * Take university class.
@@ -2592,6 +2645,9 @@ export interface Singularity {
    *
    * If the active level of a source file is 0, that source file won't be included in the result.
    *
+   * This function does not require owning Source-File 4 or being in BitNode 4. You can also use
+   * {@link ResetInfo.ownedSF | ResetInfo.ownedSF} as a lower-RAM alternative.
+   *
    * @returns Array containing an object with number and level of the source file.
    */
   getOwnedSourceFiles(): SourceFileLvl[];
@@ -2727,9 +2783,9 @@ export interface Singularity {
    * RAM cost: 5 GB * 16/4/1
    *
    *
-   * This function will perform a reset even if you don’t have any augmentation installed.
+   * Performs the same reset as when you install Augmentations. This can be used even when no Augmentations are queued. Installs any queued Augmentations.
    *
-   * @param cbScript - This is a script that will automatically be run after Augmentations are installed (after the reset). This script will be run with no arguments and 1 thread. It must be located on your home computer.
+   * @param cbScript - This is a script that will automatically be run after the reset. This script will be run with no arguments and 1 thread. It must be located on your home computer.
    */
   softReset(cbScript?: string): void;
 
@@ -2887,11 +2943,15 @@ export interface Singularity {
    *   OR
    * Completed the final black op.
    *
-   * @param nextBN - BN number to jump to
+   * If you do not want to move on to the next BN and instead stay on the BitVerse screen, you can set nextBN
+   * to undefined. Note that with the hacking route, using {@link Singularity.installBackdoor | installBackdoor} is a
+   * cheaper way to do this.
+   *
+   * @param nextBN - BN number to jump to. Passing undefined leaves you on the BitVerse screen.
    * @param callbackScript - Name of the script to launch in the next BN.
    * @param bitNodeOptions - BitNode options for the next BN.
    */
-  destroyW0r1dD43m0n(nextBN: number, callbackScript?: string, bitNodeOptions?: BitNodeOptions): void;
+  destroyW0r1dD43m0n(nextBN?: number, callbackScript?: string, bitNodeOptions?: BitNodeOptions): void;
 
   /**
    * Get the current work the player is doing.
@@ -4560,6 +4620,21 @@ export interface Darknet {
   connectToSession(host: string, password: string): DarknetResult;
 
   /**
+   * Overloads a darknet server with feedback to lock it down. Similar to status link, it will no longer move
+   * or go offline, although servers connected to it may still move. However, it also loses all of its max ram,
+   * and no longer gives experience.
+   *
+   * This technique is sometimes used to sacrifice a new device that appears on the network to make
+   * it easier to probe it for weaknesses and develop scripts against it.
+   *
+   * @remarks
+   * RAM cost: 2 GB
+   *
+   * @param host - Hostname/IP of the target server.
+   */
+  freezeServer(host: string): DarknetResult;
+
+  /**
    * Uses an exploit to extract log data from a server by sending a malformed heartbeat request.
    * Retrieves the most recent logs on the server. This can be used to get more feedback on authentication attempts.
    * The retrieved logs are removed from the server, unless the "peek" flag is set to true in the provided HeartbleedOptions.
@@ -4670,9 +4745,9 @@ export interface Darknet {
    * RAM cost: 4 GB
    *
    * @param host - Hostname/IP of the connected server to migrate.
-   * @returns A promise that resolves to a {@link DarknetResult} object.
+   * @returns A promise that resolves to a {@link DarknetResult} object with a `progress` field indicating the total migration progress in the range [0, 1].
    */
-  induceServerMigration(host: string): Promise<DarknetResult>;
+  induceServerMigration(host: string): Promise<DarknetResult & { progress: number }>;
 
   /**
    * Executes STORM_SEED.exe, if it is present on the server the script is running on.
@@ -4739,8 +4814,11 @@ export interface Darknet {
   getDepth(host?: string): number;
 
   /**
-   * Spends some time spreading propaganda about a stock to increase its volatility. This does not actually change the stock's forecasts, but
-   * a savvy investor can take advantage of the chaos. The effect scales with charisma and the number of threads used, but degrades over time if left alone.
+   * Spends some time spreading propaganda about a stock to increase its volatility. This does not actually change the
+   * stock's forecasts, but a savvy investor can take advantage of the chaos. The effect scales with charisma and the
+   * number of threads used, but degrades over time if left alone.
+   *
+   * This function requires TIX API access. You can use {@link Stock.purchaseTixApi | purchaseTixApi} to purchase it.
    *
    * @remarks
    * RAM cost: 2 GB
@@ -6523,7 +6601,7 @@ interface DarknetFormulas {
   /**
    * Gets the time it will take to scrape logs from a server.
    * @param serverDetails - The server to check heartbleed log scraping time on.
-   * @param threads - The number of threads to use for the authentication. Optional, defaults to 1
+   * @param threads - The number of threads to use for log scraping. Optional, defaults to 1
    * @param player - The player object. Optional, defaults to the current player status
    */
   getHeartbleedTime(serverDetails: DarknetServerDetails, threads?: number, player?: Person): number;
@@ -6870,7 +6948,11 @@ interface UserInterface {
    *
    * If the function is called with no arguments, it will close the current script’s logs.
    *
-   * Otherwise, the pid argument can be used to close the logs from another script.
+   * Otherwise, the pid argument can be used to close the logs from another script. Tail windows can remain open
+   * after a script finishes, and can still be closed using that script's PID. If the script is rerun from its tail
+   * window, use the PID of the new process.
+   *
+   * If no tail window exists for the given PID, this function has no effect.
    *
    * @param pid - Optional. PID of the script having its tail closed. If omitted, the current script is used.
    */
@@ -7033,6 +7115,100 @@ interface UserInterface {
    * @param editorOptions - Optional. Settings for opening the editor, such as `vim` mode
    */
   openCodeEditor(files?: string | string[], editorOptions?: EditorOptions): void;
+
+  /**
+   * Programmatically sets an alias.
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * This is functionally equivalent to typing `alias ${alias}=${substitution}` in the terminal.
+   *
+   * This function throws an error if `alias` is an empty string or contains any invalid characters (only alphanumeric
+   * characters and `_|!%,@-` are allowed).
+   *
+   * Only one alias may be defined for a given context. Setting a global alias will silently overwrite an existing
+   * non-global alias with the same name, and vice versa.
+   *
+   * @example
+   * ```js
+   * export async function main(ns) {
+   *   ns.ui.alias("nuke", "run NUKE.exe"); // Equivalent to typing `alias nuke="run NUKE.exe"`
+   *   ns.ui.alias("worm", "HTTPWorm.exe", true); // Equivalent to typing `alias -g worm="HTTPWorm.exe"`
+   * }
+   *
+   * ```
+   * @param alias - The alias name to set.
+   * @param substitution - The substitution to run.
+   * @param isGlobal - Whether the alias should be set as a global alias. Global aliases replace all occurrences of the
+   * alias with the substitution string.
+   */
+  alias(alias: string, substitution: string, isGlobal?: boolean): void;
+
+  /**
+   * Clears an existing alias.
+   *
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * @param alias - The alias to clear.
+   * @returns - True if there was a previous alias set.
+   */
+  unalias(alias: string): boolean;
+
+  /**
+   * Returns a list of every alias that's been set.
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * @returns A map of alias names to an object containing the substitution string and if the alias was set to global.
+   */
+  getAllAliases(): Map<string, { substitution: string; isGlobal: boolean }>;
+
+  /**
+   * Renders a ReactNode in the main content area.
+   *
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * On the left side of the UI, the sidebar contains shortcuts to game features (Terminal, Script Editor, City, etc.).
+   * When clicking a sidebar item, the feature is rendered on the right side of the UI. This space is the main content
+   * area.
+   *
+   * For example, when you click the "City" button in the sidebar, the locations in that city are rendered in the main
+   * content area.
+   *
+   * This function effectively switches to a new custom "page", as if you had navigated via the sidebar. Calling it
+   * again replaces the contents of the page.
+   *
+   * @param node - The node to be rendered.
+   */
+  renderPage(node: ReactNode): void;
+
+  /**
+   * Allows programmatic use of AutoLink.exe.
+   *
+   * @remarks
+   * RAM cost: 5 GB
+   *
+   * This function uses AutoLink.exe to create a clickable link. Clicking on the link is
+   * equivalent to typing a sequence of "connect" commands into the terminal.
+   *
+   * @example
+   * ```js
+   * export async function main(ns) {
+   *   // Prints a link to the terminal. Clicking on it is equivalent
+   *   // to typing `connect joesguns; connect zer0; connect silver-helix`.
+   *   ns.tprintRaw(ns.ui.createConnectLink(['joesguns', 'zer0', 'silver-helix']));
+   * }
+   * ```
+   *
+   * @param connectPath - Hostnames or IP addresses of servers to connect to.
+   * @param linkText - The text to display on the link. Defaults to the last hostname or IP in connectPath. If
+   * connectPath is an empty array and linkText is nullish, linkText is set to `"do nothing"`.
+   * @returns A ReactElement that can be used with APIs such as {@link NS.tprintRaw | tprintRaw} and
+   * {@link NS.printRaw | printRaw}.
+   */
+  createConnectLink(connectPath: string[], linkText?: string): ReactElement;
 }
 
 /**
@@ -7969,8 +8145,6 @@ export interface NS {
    *
    * Running this function with 0 or fewer threads will cause a runtime error.
    *
-   * For password-protected servers (such as darknet servers), a session must be established with the destination server before using this function.
-   *
    * @example
    * ```js
    * //The following example will execute the script ‘foo.js’ with 10 threads, in 500 milliseconds and the arguments ‘foodnstuff’ and 90:
@@ -8102,11 +8276,11 @@ export interface NS {
    * Returns an array with the filenames of all files on the specified server
    * (as strings). The returned array is sorted in alphabetic order.
    *
-   * @param host - Hostname/IP of the target server.
+   * @param host - Hostname/IP of the target server. Defaults to current server if not provided.
    * @param substring - A substring to search for in the filename.
    * @returns Array with the filenames of all files on the specified server.
    */
-  ls(host: string, substring?: string): string[];
+  ls(host?: string, substring?: string): string[];
 
   /**
    * List running scripts on a server.
@@ -8526,12 +8700,14 @@ export interface NS {
    * RAM cost: 0 GB
    *
    * This function returns the metadata associated with the specified file.
+   * If the file does not exist or the server is offline, returns null. It will throw if the path or host is malformed.
    *
    * @param filename - Name of the file to read the metadata from. It must be a text file (.txt, .json, .css) or a script
    * (.js, .jsx, .ts, .tsx).
+   * @param host - Hostname/IP of the target server. Optional. Defaults to current server if not provided.
    * @Returns The metadata of the file.
    */
-  getFileMetadata(filename: string): FileMetadata;
+  getFileMetadata(filename: string, host?: string): FileMetadata | null;
 
   /**
    * Get a copy of the data from a port without popping it.
@@ -8610,11 +8786,39 @@ export interface NS {
    * RAM cost: 0 GB
    *
    * Get a handle to a Netscript Port.
+   *
+   * All methods of the port handle can be used while the ns instance is "busy" (they avoid the concurrency check), or
+   * even when it is dead.
+   *
    * Ports are shared across all hosts and contents are reset on game restart.
    *
    * @param portNumber - Port number. Must be a positive integer.
    */
   getPortHandle(portNumber: number): NetscriptPort;
+
+  /**
+   * Check if a port is full.
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * Returns true if the port's data queue is full, and false otherwise.
+   * Ports are shared across all hosts and contents are reset on game restart.
+   *
+   * @param portNumber - Port number. Must be a positive integer.
+   */
+  isFullPort(portNumber: number): boolean;
+
+  /**
+   * Check if a port is empty.
+   * @remarks
+   * RAM cost: 0 GB
+   *
+   * Returns true if the port's data queue is empty, and false otherwise.
+   * Ports are shared across all hosts and contents are reset on game restart.
+   *
+   * @param portNumber - Port number. Must be a positive integer.
+   */
+  isEmptyPort(portNumber: number): boolean;
 
   /**
    * Delete a file.
@@ -9004,8 +9208,7 @@ export interface NS {
    *
    * Move the source file to the specified destination on the target server.
    *
-   * This command only works for scripts (.js, .jsx, .ts, .tsx) and text files (.txt, .json, .css). It cannot, however, be
-   * used to convert from script to text file, or vice versa.
+   * This command only works for scripts (.js, .jsx, .ts, .tsx) and text files (.txt, .json, .css).
    *
    * This function can also be used to rename files.
    *
@@ -9114,7 +9317,10 @@ export interface NS {
    * ```
    * `bar` in the last example is `"false"` (a string), not `false` (a boolean). `data.bar` is truthy, not falsy.
    */
-  flags(schema: [string, string | number | boolean | string[]][]): { [key: string]: ScriptArg | string[] };
+  flags(schema: [string, any][]): {
+    [key: string]: any;
+    _: ScriptArg[];
+  };
 
   /**
    * Share the server's ram with your factions to increase the reputation gain rate of faction work. This boost is
@@ -9598,7 +9804,18 @@ type CodingContractNameEnumType = {
 /** @public */
 type CodingContractName = _ValueOf<CodingContractNameEnumType>;
 
-/** @public */
+/**
+ * This is a map of contract types to their input and answer data types. The key is the contract type. The value is a
+ * tuple containing the input and answer data types.
+ *
+ * @example
+ * ```
+ * "Subarray with Maximum Sum": [number[], number]
+ * ```
+ * For the "Subarray with Maximum Sum" contract, the input type is `number[]` and the answer type is `number`.
+ *
+ * @public
+ */
 export type CodingContractSignatures = {
   "Find Largest Prime Factor": [number, number];
   "Subarray with Maximum Sum": [number[], number];
@@ -9627,7 +9844,7 @@ export type CodingContractSignatures = {
   "Compression III: LZ Compression": [string, string];
   "Encryption I: Caesar Cipher": [[string, number], string];
   "Encryption II: Vigenère Cipher": [[string, string], string];
-  "Square Root": [bigint, bigint, [string, string]];
+  "Square Root": [bigint, bigint];
   "Total Number of Primes": [[number, number], number];
   "Largest Rectangle in a Matrix": [(1 | 0)[][], [[number, number], [number, number]]];
 };
@@ -9665,6 +9882,7 @@ type NSEnums = {
   FragmentType: FragmentEnumType;
   DarknetResponseCode: DarknetResponseCodeType;
   ProgramName: ProgramNameEnumType;
+  GangTaskName: GangTaskNameEnumType;
 };
 
 /**
@@ -10132,11 +10350,27 @@ export interface WarehouseAPI {
    * @remarks
    * RAM cost: 20 GB
    *
-   * This limit applies only to output; it does not affect input consumption.
+   * This limit applies only to output. It does not reduce input consumption. The excess output is discarded after being
+   * produced.
    *
-   * For example, in Agriculture, assume the division's raw production is 1000. You need to consume 500 Water and 200
-   * Chemicals to produce 1000 Plants and 1000 Food. If you set the limits for Plants and Food to 200 and 100
-   * respectively, you will still consume 500 Water and 200 Chemicals, but only produce 200 Plants and 100 Food.
+   * For example: Assume the division's raw production is 1000 and the warehouse has enough input materials. In
+   * Agriculture, for each unit of raw production, you need 0.045 units of free space (check corporation documentation
+   * for further explanation). Therefore, with RawProduction = 1000, you need 45 units of free space to avoid being
+   * bottlenecked by insufficient free space.
+   *
+   * Case 1: Enough free space (Free space = 45). You need to consume 500 Water and 200 Chemicals to produce 1000
+   * Plants and 1000 Food.
+   *
+   * If you set the limits for Plants and Food to 200 and 100 respectively, you will still consume 500 Water and 200
+   * Chemicals, but only produce 200 Plants and 100 Food (the excess 800 Plants and 900 Food are discarded after being
+   * produced). The free space after production is 67 (800 Plants and 900 Food are discarded).
+   *
+   * Case 2: Insufficient free space (Free space = 22.5). The available free space is only 50% of the required free
+   * space. Therefore, RawProduction is scaled down to 500.
+   *
+   * You need to consume 250 Water and 100 Chemicals to produce 500 Plants and 500 Food. If you set the Food limit to 0,
+   * you will still consume 250 Water and 100 Chemicals, but only produce 500 Plants (the excess 500 Food are discarded
+   * after being produced). The free space after production is 15 (500 Food are discarded).
    *
    * With industries that produce both materials and products, the material production limits do not affect product
    * production.
@@ -11082,7 +11316,10 @@ interface AutocompleteData {
   /** Netscript Enums */
   enums: NSEnums;
   /** Parses the flags schema on the already inputted flags */
-  flags(schema: [string, string | number | boolean | string[]][]): { [key: string]: ScriptArg | string[] };
+  flags(schema: [string, any][]): {
+    [key: string]: any;
+    _: ScriptArg[];
+  };
   /** The hostname of the server the script would be running on */
   hostname: string;
   /** The filename of the script about to be run */
